@@ -1,5 +1,5 @@
 ---
-title: "Task 1"
+title: "Akciju stebejimas su R programa"
 author: "Paulius Kostickis"
 date: "Sunday, February 14, 2016"
 output: html_document
