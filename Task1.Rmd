@@ -47,7 +47,7 @@ chartSeries(XPTUSD,name="Platinum (.oz) in $USD")
 chartSeries(to.weekly(XPTUSD),up.col='white',dn.col='blue')
 ```
 
-Su quantmod paketu galima gauti daugybe ivairiu grafiku skirtu stebeti akciju rinka, stai screenshot'as dalies dalies:
+Su quantmod paketu galima gauti daugybe ivairiu grafiku skirtu stebeti akciju rinka, stai screenshot'as dalies grafiku:
 
 ![alt text](http://www.quantmod.com/gallery/dozen-charts.png)
 
