@@ -1,0 +1,54 @@
+---
+title: "Akciju stebejimas su R programa"
+author: "Paulius Kostickis"
+date: "Sunday, February 14, 2016"
+output: html_document
+---
+
+Paketo "quantmod" issaukimas:
+```{r,message=FALSE}
+library("quantmod")
+```
+
+Juo naudojantis galime atsisiusti reikiama akciju birzos informacija ir issaugoti i faila "mysymbols.rda" ir veliau siuos duomenis naudoti analizei ir modeliu kurimui:
+```{r,message=FALSE,eval=F}
+getSymbols("GOOG",src="google") # from google finance, src  character string specifying sourcing method. (google)
+getSymbols("YHOO",src="yahoo") # from yahoo finance 
+#getSymbols("DEXJPUS",src="FRED") # FX rates from FRED 
+#getSymbols("XPT/USD",src="Oanda") # Platinum from Oanda 
+
+# Specify lookup parameters, and save for future sessions. 
+setSymbolLookup(YHOO='yahoo',GOOG='google') 
+setSymbolLookup(DEXJPUS='FRED') 
+setSymbolLookup(XPTUSD=list(name="XPT/USD",src="oanda")) 
+saveSymbolLookup(file="mysymbols.rda") 
+
+
+# new sessions call loadSymbolLookup(file="mysymbols.rda") 
+getSymbols(c("YHOO","GOOG")) 
+
+```
+
+Veliau galime isbrezti tokius kaip OHLC (Open-high-low-close chart) ir candle grafikus:
+```{r}
+getSymbols("AAPL",src="yahoo") #Apple akcijos
+
+barChart(AAPL) #juostine diagrama
+
+# Add multi-coloring and change background to white 
+candleChart(AAPL,multi.col=TRUE,theme="white")
+
+#Non-OHLC and Volume series are handled automatically 
+getSymbols("XPT/USD",src="oanda") 
+chartSeries(XPTUSD,name="Platinum (.oz) in $USD") 
+
+
+#Platinum, now weekly with custom color candles using the quantmod function to.weekly 
+chartSeries(to.weekly(XPTUSD),up.col='white',dn.col='blue')
+```
+
+Su quantmod paketu galima gauti daugybe ivairiu grafiku skirtu stebeti akciju rinka, stai screenshot'as dalies grafiku:
+
+![alt text](http://www.quantmod.com/gallery/dozen-charts.png)
+
+Saltinis:http://www.quantmod.com/examples/intro/
