@@ -1,0 +1,98 @@
+---
+title: "Rulete ir Moneta"
+author: "Paulius Kostickis"
+date: "Monday, March 07, 2016"
+output: html_document
+---
+
+###Uzduotis Rulete:
+Nagrinekime standartine kazino rulete. Kokia tikimybe po 1000 vienodu statymu ant vienos pasirinktos spalvos, bus 
+teigiamas balansas? Raskite apytiksle x reiksme, kuriai galioja nelygybe 
+P( balansas < x ) = 0.25.
+
+Taisykles: yra 37 skaiciai ruletes rate, po 18 juodu ir raudonu skaiciu ir vienas zalias skaicius. Galima statyti ant 
+pasirinktos juodos arba raudonos spalvos ir jei pasirinkta spalva iskrenta, gauname dviguba pastatyta suma atgal. Jei 
+neiskrenta pasirinkta spalva, pralaimime statyma. Jei iskrenta vienintelis zalias skaicius, prarandame puse statytos 
+sumos.
+
+Taigi sukuriame vienos dienos losimo sesijos simuliacijos fnkcija, kurioje issukama rulete 1000 kartu:
+```{r}
+gamble <- function(){
+  x =sample(c(-0.5,-1,1),1000,prob = c(1/37,18/37,18/37),replace=T)
+  x=sum(x)
+}
+```
+
+Naudojant monte carlo metoda bandysime atsakyti i uzduotus klausimus, sudarome 10^5 losimu sesiju: 
+```{r}
+y <- replicate(10^5,gamble())
+```
+
+Tikimybe, kad balansas > 0
+```{r}
+p=mean(y>0)
+p
+
+```
+Kad galiotu P ( balansas < x ) = 0.25, x turi buti:
+```{r}
+x=quantile(y, 0.25)
+unname(x)
+```
+
+
+
+###Uzduotis moneta:
+Tarkime metama moneta. Jeigu iskrenta herbas, tai laimite 12 EUR. Jeigu skaicius, tai pralosiate 10 EUR. Bus zaidziama n kartu ir gauti rezultatai sumuojami. Kokia tikimybe jums tureti teigiama balansa po n kartu? Kokis islosiu pasikliautiniai 95 intervalai. Istirkite tikimybes su skirtingais n, pvz. n=1,2,5,10,20,100. Kaip atrodo balanso tankis? Kai n=100.
+
+Funkcija n ismetimo simuliacija:
+```{r}
+flip <- function(n){
+    x=sample(c(-10,12),n,replace=T)
+    x=sum(x)
+}
+```
+
+Tirsime losimo sesija, kai metama n kartu (t.y. 1,2,5,10,20,100). Naudosime monte carlo metoda ir simuliuosime 10^4 losimu sesiju su n metimu vienoje sesijoje ir viska isaugau matricoje y.
+
+```{r}
+n=c(1,2,5,10,20,100)
+u = numeric(0)
+for(i in 1:6){
+  a<- replicate(10^4,flip(n[i]))
+  u = c(u,a)
+}
+y=matrix(u, byrow = F, ncol = 6)
+head(y)
+```
+
+Kaip matome, pirmas stulpelis sesiju realizacijos, kai n=1, antras stulpelis sesiju realizacijos, n=2 (du kartus mesta moneta sesijoje) ir pan.  
+
+
+Dabar galime gauti gan tikslu tikimybiu vektoriu, kurio kiekviena pozicija atitinkamai atsako i klausima kokia tikimybe, kad po sesijos bus teigiamas balansas, kai n=1,2,5,10,20,100.
+
+```{r}
+  p=numeric(0)
+  for(i in 1:6){
+  p[i]<-mean(y[,i]>0)
+  print(p[i])
+}
+```
+
+
+O atitinkamu n=1,2,5,10,20,100 metimu per sesija laimejimu 95% pasikliautinieji intervalai yra:
+
+```{r}
+g=numeric(0)
+for(i in 1:6){
+  x=c(quantile(y[,i], 0.025),quantile(y[,i], 0.975))
+  g=c(g,"[",unname(x[1]),",",unname(x[2]),"]")
+}
+
+paste(g,collapse=" ")
+```
+
+Tankio grafikas, kai n= 100 (N=10000 reiskia skaiciu sesiju)
+```{r}
+plot(density(y[,6]),main="tankis, kai n=100", lwd = 2)
+```
