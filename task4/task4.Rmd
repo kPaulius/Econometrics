@@ -6,7 +6,6 @@ output: html_document
 ---
 
 Aplanke task4 yra duomenų failas, kuriame rasite nekilnojamo turto (o tiksliau gyvenaųjų būtų) kainas ir kaikurias jų charakteristikas. Užduotis atlikti išsamią tiesinę regresiją. Lygtis reikalinga prekyboms agentams, kad geriau suprastų kokią įtaką skirtingos charakteristikos daro galutinei kainai.
-
 ```{r,message=F}
 
 library(lmtest)
@@ -71,7 +70,6 @@ Modelių kūrimas
 mod=lm(newdata$kaina~newdata$plotas + newdata$aukstas+newdata$garsoIzoliacija+newdata$silumosLaidumas+newdata$atstumasIkiPrekybosCentro)
 kable(summary(mod)$coef, digits=2) # du nereiksmingus rodo
 resettest(mod,power=2:3,type="regressor")$p.value   #nereikia kelti laipsniais kintamuosius, nes p reikšmė < 0,05
-resettest(mod,power=1/2,type="regressor")$p.value   #nereikia kvadratines saknies, nes p reikšme < 0,05 
 ```
 Taigi nereikia kintamųjų kelti laipsniais (reset testas tikrina ar įtraukti kintamieji su pakeltais laipsniais yra reikšmingi, šiuo atveju buvo nereikšmingi)
 
@@ -104,8 +102,15 @@ plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # išbra
 abline(h = 4*mean(cooksd), col="red")  # nubrėžiame liniją, nuo kurios šalinsime išskirtis
 text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  
 # pavadiname išskirčių taškus, nurodome jų duomenų vietas 
-influential <- as.numeric(names(cooksd)[(cooksd > 4*mean(cooksd, na.rm=T))]) #išsaugome išskirčių vietas
-newdata=newdata[-c(influential),]#naikiname tas išskirtis
+newdata=newdata[-c(186),]#naikiname vieną išskirtį
+
+mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=newdata) #antras modelis, jau su išmesta išskirtimi.
+
+cooksd <- cooks.distance(mod2)
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # išbraižome cook'o distancija
+abline(h = 4*mean(cooksd), col="red")  # nubrėžiame liniją, nuo kurios šalinsime išskirtis
+text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  
+# pavadiname išskirčių taškus, nurodome jų duomenų vietas
 ```
 
 
