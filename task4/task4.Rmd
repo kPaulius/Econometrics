@@ -144,12 +144,12 @@ AIC(mod4)
 
 Homoskedastiškumo tikrinimas:
 ```{r}
-bptest(mod4)            # neatmetam hipotezės, kad homoskedastiškas
+bptest(mod4)            # neatmetam H0 hipotezės, kad homoskedastiškas. Reiškia galime teigti, homoskedastiškas
 ```
 
 Autokoreliacijos tikrinimas:
 ```{r}
-durbinWatsonTest(mod4)  # neatmetam hipotezes kad nera autokoreliacijos 
+durbinWatsonTest(mod4)  # neatmetam H0 hipotezės, kad nėra autokoreliacijos. Autokoreliacijos nėra 
 ```
 
 Taigi galutinis modelis:
@@ -157,4 +157,4 @@ Taigi galutinis modelis:
 kable(summary(mod4)$coef,digits=2)
 ```
 
-Už kiekvieną pločio arba garso izoliacijos rodiklio padidėjimą, kaina padidėja maždaug 600. Jei nekilnojamas turtas pirmo aukšto, jo kaina maždaug sumažėja 5000 kaina. 
+Už kiekvieną pločio arba garso izoliacijos rodiklio padidėjimą, kaina padidėja maždaug 600 vienetais. Jei nekilnojamas turtas pirmo aukšto, jo kaina maždaug sumažėja 5000 kainos vienetais. 
