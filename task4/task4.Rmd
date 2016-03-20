@@ -102,7 +102,8 @@ plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # išbra
 abline(h = 4*mean(cooksd), col="red")  # nubrėžiame liniją, nuo kurios šalinsime išskirtis
 text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  
 # pavadiname išskirčių taškus, nurodome jų duomenų vietas 
-data=data[-c(186),]#naikiname vieną išskirtį
+data=data[-c(208),]#naikiname vieną išskirtį (numeris ir jo padėtis duomenyse nesutapo dėl ankstesnio
+                   #duomenių naikinimo)
 
 mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=data) #antras modelis, jau su išmesta išskirtimi.
 
