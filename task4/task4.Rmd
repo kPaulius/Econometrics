@@ -55,19 +55,19 @@ remove_outliers <- function(x) {
   y[x > (qnt[2] + H)] <- NA
   return(y)
 }
-newdata=lapply(data,remove_outliers)         # ieškoma išskirtys visose duomenų stulpeliuose
-newdata=data.frame(newdata)                  # list'as paverčiamas vėl į data frame tipą
+data[1:4]=lapply(data[1:4],remove_outliers)          # ieškoma išskirtys tik keturiose stulpeliuose, nes kaip
+                                                  # vėliau pamatysime, tik keturi stulpeliai mums reikalingi
+                                                  
 
-row.has.na <- apply(newdata, 1, function(x){any(is.na(x))})    #tikrina visas duomenų eilutes ir jei randa
+row.has.na <- apply(data, 1, function(x){any(is.na(x))})    #tikrina visas duomenų eilutes ir jei randa
     #ištrintą reikšmę (t.y. pakeistą į NA), tada pažymime, kad ta eilutė turi išskirtį
-newdata<- newdata[!row.has.na,]    #perankame duomenų eilutes, kurios neturi išskirčiu ir pavadiname šią 
-    #duomenų lentelę newdata
+data<- data[!row.has.na,]    #perankame duomenų eilutes, kurios neturi išskirčių
 
 
 ```
 Modelių kūrimas
 ```{r}
-mod=lm(newdata$kaina~newdata$plotas + newdata$aukstas+newdata$garsoIzoliacija+newdata$silumosLaidumas+newdata$atstumasIkiPrekybosCentro)
+mod=lm(kaina~plotas + aukstas+garsoIzoliacija+silumosLaidumas+atstumasIkiPrekybosCentro,data=data)
 kable(summary(mod)$coef, digits=2) # du nereiksmingus rodo
 resettest(mod,power=2:3,type="regressor")$p.value   #nereikia kelti laipsniais kintamuosius, nes p reikšmė < 0,05
 ```
@@ -82,12 +82,12 @@ cor(data$garsoIzoliacija,data$silumosLaidumas) #kadangi ju koreliacija arti vien
 #to estimate a solution. Šaltinis: http://www.nature.com/bdj/journal/v199/n7/full/4812743a.html)
 
 
-mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=newdata) #antras modelis, kuriame buvo išmesti nereikšmingi duomenys.
+mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=data) #antras modelis, kuriame buvo išmesti nereikšmingi duomenys.
 kable(summary(mod2)$coef, digits=2) # visi reikšmingi
 ```
 
 
-Lyginame mod ir mod2 modelius pagal AIC("Akaike's Information Criteria") kriterijų. mod2 turi mažesnį AIC, todėl jis yra geresnis:
+Lyginame mod ir mod2 modelius pagal AIC("Akaike's Information Criteria") kriterijų. mod2 turi mažesnį AIC, taip pat yra paprastesnis ir be stipriai tarpusavyje koreliuotų kintamųjų, todėl mod2 geresnis:
 
 ```{r}
 AIC(mod)
@@ -102,9 +102,9 @@ plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # išbra
 abline(h = 4*mean(cooksd), col="red")  # nubrėžiame liniją, nuo kurios šalinsime išskirtis
 text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""), col="red")  
 # pavadiname išskirčių taškus, nurodome jų duomenų vietas 
-newdata=newdata[-c(186),]#naikiname vieną išskirtį
+data=data[-c(186),]#naikiname vieną išskirtį
 
-mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=newdata) #antras modelis, jau su išmesta išskirtimi.
+mod2=lm(kaina~plotas +aukstas+garsoIzoliacija,data=data) #antras modelis, jau su išmesta išskirtimi.
 
 cooksd <- cooks.distance(mod2)
 plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # išbraižome cook'o distancija
@@ -116,8 +116,8 @@ text(x=1:length(cooksd)+1, y=cooksd, labels=ifelse(cooksd>4*mean(cooksd, na.rm=T
 
 Kadangi nekilnojimo turto aukštas yra ranginis kintamasis, naudosiu jį kaip dummy variable:
 ```{r}
-aukstasn=factor(newdata$aukstas)   #aukšto skaičius paverčiamas į faktorių
-mod3=lm(kaina~plotas +aukstasn+garsoIzoliacija,data=newdata)
+aukstasn=factor(data$aukstas)   #aukšto skaičius paverčiamas į faktorių
+mod3=lm(kaina~plotas +aukstasn+garsoIzoliacija,data=data)
 kable(summary(mod3)$coef,digits=2)
 ```
  
@@ -129,8 +129,8 @@ AIC(mod3)
 
 Kadangi skirtumai tarp 2-9 aukštų yra labai maži, išskiriame tik 1 arba 2-9 aukštus (t.y. tikrinam tik ar nekilnojamas turtas pirmam aukšte ar ne pirmame) ir sukuriame mod4 modelį
 ```{r}
-aukstas1=newdata$aukstas==1
-mod4=lm(kaina~plotas +aukstas1+garsoIzoliacija,data=newdata)
+aukstas1=data$aukstas==1
+mod4=lm(kaina~plotas +aukstas1+garsoIzoliacija,data=data)
 kable(summary(mod4)$coef,digits=2)
 ```
 
