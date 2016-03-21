@@ -1,0 +1,71 @@
+---
+title: "Task 5"
+author: "Paulius Kostickis"
+date: "Sunday, March 20, 2016"
+output: html_document
+---
+
+Užduotis: Pinigų paklausa. Šioje užduotyje reikia atlikti tiesinę regresiją. Pakete dynlm yra duomenų masyvas M1Germany - ten yra ir jo aprašymas. Iš turimų duomenų sudarykite ir įvertinkite tiesinę regresiją, kurios endoneninis kintamasis yra logm1. Lygtis būtų naudojama prognozuoti pinigų kiekį artimiausiam laikotarpiui į prieki remiantis dabartine situacija. Taigi prognozės sudarymui lygtis gali naudoti tik tuos duomenis, kurie būtų žinomi prognozavimo momentu.
+
+
+```{r}
+library(dynlm)
+library(knitr)
+data=ts(M1Germany)
+logprice = ts(M1Germany$logprice)
+logm1 =ts(M1Germany$logm1)
+loggnp =ts(M1Germany$loggnp)
+interest=ts(M1Germany$interest) 
+```
+
+Nėra akivaizdaus išskirčių problemos, matomas trendas
+```{r}
+plot(data) 
+
+```
+
+
+
+
+
+
+
+
+Modelių kūrimas, įtraukiu daug kintamųjų ir nereikšmingus naikinu
+```{r}
+
+mod1=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:5))+d(L(interest,0:5)) ,data=data)
+summary(mod1)
+mod2=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:5))+d(L(interest,0:3)) ,data=data)
+summary(mod2)
+mod3=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
+summary(mod3)
+mod4=dynlm(logm1~logprice+L(logprice,2:3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
+summary(mod4)
+mod5=dynlm(logm1~logprice+L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
+summary(mod5)
+mod6=dynlm(logm1~logprice+L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:1)) ,data=data)
+summary(mod6)
+mod7=dynlm(logm1~L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:1)) ,data=data)
+summary(mod7)
+mod8=dynlm(logm1~L(logprice,3)+d(L(loggnp,0:2))+d(interest) ,data=data)
+summary(mod8)
+
+```
+
+Ir pagal AIC mod8 geriausias
+```{r}
+AIC(mod1)
+AIC(mod2)
+AIC(mod3)
+AIC(mod4)
+AIC(mod5)
+AIC(mod6)
+AIC(mod7)
+AIC(mod8)
+```
+su reikšmingumo lygmeniu 0.05 negalime atmesti, kad normalios liekanos. Tačiau paėmus reikšmingumo lygį 0.1, galėtume sakyti, jog liekanos nėra normalios. Tai kelia abejonių dėl pasirinkto modelio. 
+```{r}
+shapiro.test(mod8$res) #su reikšmingumo lygmeniu 0,05 negalime atmesti, kad normalios liekanos. Tačiau paėmus 
+                        
+```
