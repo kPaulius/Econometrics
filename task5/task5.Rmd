@@ -8,7 +8,7 @@ output: html_document
 Užduotis: Pinigų paklausa. Šioje užduotyje reikia atlikti tiesinę regresiją. Pakete dynlm yra duomenų masyvas M1Germany - ten yra ir jo aprašymas. Iš turimų duomenų sudarykite ir įvertinkite tiesinę regresiją, kurios endoneninis kintamasis yra logm1. Lygtis būtų naudojama prognozuoti pinigų kiekį artimiausiam laikotarpiui į prieki remiantis dabartine situacija. Taigi prognozės sudarymui lygtis gali naudoti tik tuos duomenis, kurie būtų žinomi prognozavimo momentu.
 
 
-```{r}
+```{r,message=F}
 library(dynlm)
 library(knitr)
 data=ts(M1Germany)
@@ -18,42 +18,38 @@ loggnp =ts(M1Germany$loggnp)
 interest=ts(M1Germany$interest) 
 ```
 
-Nėra akivaizdaus išskirčių problemos, matomas trendas
+Įvairūs grafikai
 ```{r}
 plot(data) 
+pacf(interest)
+pacf(loggnp, na.action=na.omit)
+pacf(logm1,na.action=na.omit) 
+pacf(logprice,na.action=na.omit) 
 
 ```
 
+Palūkanų norma neturi ryškaus trendo. Taip tai galėtume spėti, kad turi tiesioginį ryšį su pinigų paklausa - kuo didesnės palūkanos, tuo mažesnė pinigų paklausa.
+
+BVP turi akivaizdu trendą, jį pašalinsime paimdami BVP skirtumą vietoj paprasto BVP. BVP augimas turėtų didinti pinigų paklausą.
+
+Galėtume spėti, kad praėjusių laikotarpių pinigų paklausa gali prognozuoti ateities paklausą.
+
+Kainų lygis neturi trendo ir drąsiai galime teigti, kad kainų lygis didina pinigų paklausą.
 
 
-
-
-
-
-
-Modelių kūrimas, įtraukiu daug kintamųjų ir nereikšmingus naikinu
+Modelių kūrimas:
 ```{r}
 
-mod1=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:5))+d(L(interest,0:5)) ,data=data)
-summary(mod1)
-mod2=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:5))+d(L(interest,0:3)) ,data=data)
-summary(mod2)
-mod3=dynlm(logm1~L(logprice,0:3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
-summary(mod3)
-mod4=dynlm(logm1~logprice+L(logprice,2:3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
-summary(mod4)
-mod5=dynlm(logm1~logprice+L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:3)) ,data=data)
-summary(mod5)
-mod6=dynlm(logm1~logprice+L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:1)) ,data=data)
-summary(mod6)
-mod7=dynlm(logm1~L(logprice,3)+d(L(loggnp,0:2))+d(L(interest,0:1)) ,data=data)
-summary(mod7)
-mod8=dynlm(logm1~L(logprice,3)+d(L(loggnp,0:2))+d(interest) ,data=data)
-summary(mod8)
+mod1=dynlm(logm1~L(logprice,3)+d(L(loggnp,2))+d(interest) ,data=data)
+mod2=dynlm(logm1~L(logm1^2,1) +L(logprice,3)+d(L(loggnp,1))+L(interest,1) ,data=data)                                                      
+mod3=dynlm(logm1~L(logm1^2,1) +L(logprice,1)+d(L(loggnp,2))+L(interest,2),data=data)
+mod4=dynlm(logm1~L(logm1^2,1) +L(logprice,3)+d(L(loggnp,3))+L(interest,2) ,data=data)
+mod5=dynlm(logm1~L(logm1,1) +L(logprice,3)+d(L(loggnp,2))+L(interest,2) ,data=data)
+mod6=dynlm(logm1~L(logm1,1) +L(logprice,1)+d(L(loggnp,2))+L(interest,3) ,data=data)
 
 ```
 
-Ir pagal AIC mod8 geriausias
+Ir pagal AIC mod4 geriausias
 ```{r}
 AIC(mod1)
 AIC(mod2)
@@ -61,11 +57,30 @@ AIC(mod3)
 AIC(mod4)
 AIC(mod5)
 AIC(mod6)
-AIC(mod7)
-AIC(mod8)
+
+summary(mod1)
+summary(mod2)
+summary(mod3)
+summary(mod4)
+summary(mod5)
+summary(mod6)
+
 ```
-su reikšmingumo lygmeniu 0.05 negalime atmesti, kad normalios liekanos. Tačiau paėmus reikšmingumo lygį 0.1, galėtume sakyti, jog liekanos nėra normalios. Tai kelia abejonių dėl pasirinkto modelio. 
+
+Nors pagal AIC geriausias modelis yra mod4,bet pagal BVP prieaugio įtaką, esu linkęs rinktis mod6, nes jame BVP priaugis didina pinigų paklausą.(mod4 modelyje buvęs prieš 3 metus BVP prieaugis mažina paklausą) 
+
+
+Su reikšmingumo lygmeniu 0.05 negalime atmesti, kad modelio mod4 normalios liekanos. Tačiau paėmus reikšmingumo lygį 0.1, galėtume sakyti, jog liekanos nėra normalios modelio mod4. Matoma "sunki uodega" liekanų į dešinę pusę.
+Mod6 (mano pasirinktu kaip geriausiu modeliu) liekanų skirstinis atrodo kaip normalusis ir testo p.value daug didesnis nei mod4 modelio.
 ```{r}
-shapiro.test(mod8$res) #su reikšmingumo lygmeniu 0,05 negalime atmesti, kad normalios liekanos. Tačiau paėmus 
+shapiro.test(mod4$res) #su reikšmingumo lygmeniu 0,05 negalime atmesti, kad normalios liekanos.
+shapiro.test(mod6$res) #su reikšmingumo lygmeniu 0,05 negalime atmesti, kad normalios liekanos.
+hist(resid(mod4), probability = TRUE) 
+hist(resid(mod6), probability = TRUE) 
                         
+```
+
+Pasirinktas mod6 modelis(nors ir ne su mažiausiu AIC iš buvusių modelių):
+```{r}
+summary(mod6)
 ```
