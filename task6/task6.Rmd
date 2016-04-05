@@ -1,0 +1,43 @@
+---
+title: "Lab session 1 - exercise 1, task 6"
+author: "Paulius Kostickis"
+date: "Monday, April 04, 2016"
+output: html_document
+---
+
+Use the Dow Jones index (data set dowjones) to do the following:
+(a) Produce a time plot of the series.
+(b) Produce forecasts using the drift method and plot them.
+(c) Show that the graphed forecasts are identical to extending the
+line drawn between the first and last observations.
+(d) Try some of the other benchmark functions to forecast the same
+data set. Which do you think is best? Why?
+
+```{r,message=F}
+
+library(fpp)
+
+data=dowjones
+plot(data)                                                # a) dalis, išbrėžiami duomenys
+
+
+x=rwf(data, drift=TRUE, h=30)                             # b) dalis, draft prognozė 
+plot(x)
+```
+
+
+```{r,message=F}
+plot(x)                                                   # c) dalis, įrodome, kad sujungus pirmą ir
+lines(c(0,78),c(data[1],data[78]),lwd= 2, col="BLUE")     #    paskutinį tašką, gauname tokį patį rezultatą
+
+
+```
+
+
+d) dalis vidurkio prognozė, prastesnė, nes neatsižvelgia į trendą(tačiau tai gali būti ne trendas, o cyklas). Vidurkis blogiau prognozuotų praeities duomenis
+```{r}
+y=meanf(data, h=30)                                       
+plot(y)                                                   
+  
+
+```

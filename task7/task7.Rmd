@@ -1,0 +1,37 @@
+---
+title: "task 7"
+author: "Paulius Kostickis"
+date: "Tuesday, April 05, 2016"
+output: html_document
+---
+
+1. The function tsdisplay(data, plot.type="scatter") is useful
+for showing a time plot, ACF plot and lagged scatterplot on the
+same graph. Use it to produce plots of the following time series:
+bricksq, hsales, ibmclose
+Can you spot the effects of seasonality, cyclicity and trend?
+
+
+```{r,message=FALSE}
+library(fpp)
+```
+
+bricksq duomenys. Iš ACF grafiko matomas akivaizdus sezoniškumas, nes AFC kas 4 lag'us pasiekia piką. Taip pat gęstantis AFC rodo trendo egzistavimą.
+```{r}
+tsdisplay(bricksq, plot.type="scatter")  
+
+```
+
+hsales duomenys. Nėra trendo, bet yra sezoniškumas pagal AFC.
+```{r}
+tsdisplay(hsales, plot.type="scatter")
+
+```
+
+ibmclose Duomenys. Egzistuoja trendas ir nežymus sezoniškumas.
+```{r}
+tsdisplay(ibmclose, plot.type="scatter")
+```
+
+
+
