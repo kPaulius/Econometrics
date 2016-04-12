@@ -13,10 +13,12 @@ line drawn between the first and last observations.
 (d) Try some of the other benchmark functions to forecast the same
 data set. Which do you think is best? Why?
 
-```{r,message=F}
+```{r,include=F}
 
 library(fpp)
-
+````
+Duomenyse matomas trendas, nėra sezoniškumo:
+```{r}
 data=dowjones
 plot(data)                                                # a) dalis, išbrėžiami duomenys
 
@@ -34,10 +36,10 @@ lines(c(0,78),c(data[1],data[78]),lwd= 2, col="BLUE")     #    paskutinį tašk�
 ```
 
 
-d) dalis vidurkio prognozė, prastesnė, nes neatsižvelgia į trendą(tačiau tai gali būti ne trendas, o cyklas). Vidurkis blogiau prognozuotų praeities duomenis
+d) vidurkio prognozė. Ji yra prastesnė, nes neatsižvelgia į trendą ir pasikliautiniai intervalai yra labai dideli palyginus su drift metodo, todėl drift metodas geresnis:
 ```{r}
 y=meanf(data, h=30)                                       
-plot(y)                                                   
-  
+plot(y)                                                       
 
 ```
+

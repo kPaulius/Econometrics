@@ -1,0 +1,32 @@
+---
+title: "Task 7 - 3"
+output: html_document
+---
+
+3. For the data set bricksq:
+(a) Split the data into two parts using
+```{r}
+bricks1 <- window(bricksq, end=1987.99)
+bricks2 <- window(bricksq, start=1988)
+````
+(b) Check that your data have been split appropriately by produc-
+
+ing the following plot.
+plot(bricksq)
+lines(bricks1,col="red")
+lines(bricks2,col="blue")
+(c) Calculate forecasts using each of the four benchmark methods
+applied to bricks1.
+(d) Compare the accuracy of your forecasts against the actual val-
+ues stored in bricks2. For example:
+f1 <- meanf(bricks1)
+accuracy(f1,bricks2)
+(e) Which method does best? Why?
+(f) For the best method, compute the residuals and plot them. For
+example
+res <- residuals(f1)
+plot(res)
+hist(res, breaks="FD")
+Acf(res)
+Do the residuals appear to be uncorrelated and normally dis-
+tributed?
