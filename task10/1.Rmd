@@ -1,0 +1,65 @@
+---
+title: "task 10 - 1"
+author: "Paulius Kostickis"
+date: "Monday, April 18, 2016"
+output: html_document
+---
+1. For this exercise, use the price of a dozen eggs in the United States
+from 1900–1993 (data set eggs). Experiment with the various options
+in the holt() function to see how much the forecasts change
+with damped or exponential trend. Also try changing the parameter
+values for  and  to see how they affect the forecasts. Try to
+develop an intuition of what each parameter and argument is doing
+to the forecasts.
+[Hint: use h=100 when calling holt() so you can clearly see the
+differences between the various options when plotting the forecasts.]
+Which model gives the best RMSE?
+Do the residuals from the best model look like white noise?
+
+```{r,include=FALSE}
+library(fpp)
+library(knitr)
+
+```
+y = cumsum(rnorm(300))
+plot(y, type="l", main="eksponentinis glodinimas")
+
+alpha = 0.5
+l1 = filter(y*alpha, f=1-alpha,method = "recursive")
+lines(l1, col=2)
+
+
+alpha = 0.2
+l1 = filter(y*alpha, f=1-alpha,method = "recursive")
+lines(l1, col=3)
+
+
+alpha = 0.1
+l1 = filter(y*alpha, f=1-alpha,method = "recursive")
+lines(l1, col=4)
+
+
+
+
+```{r}
+tsdisplay(eggs, plot.type="scatter")   # matomas trendas ir ciklai
+fit=holt(eggs,h=100,exponential=T)
+plot(fit)
+plot(fit$model)
+plot(fit, plot.conf=FALSE)
+lines(fitted(fit), col="red")
+fit$model
+
+fit2 <- ses(eggs)
+plot(fit2$model)
+plot(fit2, plot.conf=FALSE)
+lines(fit$mean, col="red")
+
+
+summary(fit)
+alpha = 0.5
+l1 = filter(eggs*alpha, f=1-alpha,method = "recursive")
+lines(l1, col=2)
+mod$components
+plot(mod)
+```

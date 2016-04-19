@@ -24,18 +24,18 @@ tsdisplay(bricksq, plot.type="scatter")  #visų duomenų grafikas
 Paėmus duomenis iki 1972, iš ACF grafiko matomas akivaizdus sezoniškumas, nes AFC kas 4 lag'us pasiekia piką. Kadangi matuotas ketvirčiais, praėjusių metų ketvirčiai geriausiai prognozuoja tuos pačius ketvirčius kitiem metam. Taip pat gęstantis AFC rodo trendo egzistavimą.
 
 ```{r}
-data=window(bricksq,end=1972)            # iki 1972 duomenys
-tsdisplay(data, plot.type="scatter")     # iki 1972 duomenų grafikas
+data=window(bricksq,end=1972.99)            # iki 1973 duomenys
+tsdisplay(data, plot.type="scatter")     # iki 1973 duomenų grafikas
 ```
 
-bricksq duomenys. Paėmus duomenis nuo 1973, iš AFC grafiko matome, kad kovariacija apsivertė - iš teigiamo tapo neigiama ir pasiekia AFC žemumą kas 4 lag'us. Taigi yra sezoniškumas, dingo trendas, tačiau matomi cyklai.
+bricksq duomenys. Paėmus duomenis nuo 1973, iš AFC grafiko matome, kad kovariacija apsivertė - iš teigiamo tapo neigiama ir pasiekia AFC žemumą kas 4 lag'us. Taigi yra sezoniškumas, dingo trendas, tačiau matomi ciklai.
 
 ```{r}
 data2=window(bricksq,start=1973)         #nuo 1973 duomenys
 tsdisplay(data2, plot.type="scatter")    #nuo 1973 duomenų grafikas
 ```
 
-hsales duomenys. Yra sezoniškumas pagal AFC, nėra trendo, bet yra cykliškumas.
+hsales duomenys. Yra sezoniškumas pagal AFC, nėra trendo, bet yra cikliškumas.
 ```{r}
 tsdisplay(hsales, plot.type="scatter")   #visų duomenų grafikas
 ```
@@ -45,19 +45,19 @@ ibmclose duomenys.
 tsdisplay(ibmclose, plot.type="scatter") #visų duomenų grafikas
 ```
 
-Imant duomenis iki 200, egzistuoja trendas ir silpnas sezoniškumas, nėra cyklų. Iki maždaug 117 buvo kilimo trendas, o po 117 - kritimo trendas.
+Imant duomenis iki 200, egzistuoja trendas ir silpnas sezoniškumas, nėra ciklų. Iki maždaug 117 buvo kilimo trendas, o po 117 - kritimo trendas.
 
 ```{r}
-data3=window(ibmclose,end=100)           
+data3=window(ibmclose,end=100.99)           
 data4=window(ibmclose,start=101,end=200) 
-tsdisplay(data3, plot.type="scatter")    # iki 100 duomenų grafikas
+tsdisplay(data3, plot.type="scatter")    # iki 101 duomenų grafikas
 tsdisplay(data4, plot.type="scatter")    # nuo 101 iki 200 duomenų grafikas
 ```
 
-ibmclose duomenys. Duomenyse nuo 201 iki 275 dingsta sezoniškumas, išlieka kritimo trendas, atsiranda nežymių cyklų. Nuo 275 atsiranda vėl nežymus sezoniškumas.
+ibmclose duomenys. Duomenyse nuo 201 iki 275 dingsta sezoniškumas, išlieka kritimo trendas, atsiranda nežymių ciklų. Nuo 275 atsiranda vėl nežymus sezoniškumas.
 ```{r}
-data5=window(ibmclose,start=201, end=275)
-data6=window(ibmclose,start=276)
+data5=window(ibmclose,start=201, end=274.99)
+data6=window(ibmclose,start=275)
 
 tsdisplay(data5, plot.type="scatter")
 tsdisplay(data6, plot.type="scatter")

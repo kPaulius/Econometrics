@@ -4,6 +4,7 @@ output: html_document
 ---
 ```{r,include=F}
 library(fpp)
+library(knitr)
 ```
 
 3. For the data set bricksq:
@@ -19,41 +20,93 @@ ing the following plot.
 plot(bricksq)
 lines(bricks1,col="red")
 lines(bricks2,col="blue")
+legend("topleft",legend= c("iki 1988", "nuo 1988"),col = c("RED","BLUE"),lty=1)
 ````
 
 (c) Calculate forecasts using each of the four benchmark methods
 applied to bricks1.
 ```{r}
-vid=meanf(bricks1, h=20)
-naive=rwf(bricks1, h=20) 
-snaive=snaive(bricks1, h=20)
-drift=rwf(bricks1, drift=TRUE, h=20)
+vid <- meanf(bricks1, h=20)               # prognozė, lygi duomenų vidurkiui
 plot(vid)
+
+naive <- naive(bricks1, h=20)             # prognozė, kuri atsižvelgia tik į paskutinę duomenų reikšmę
 plot(naive)
+
+snaive <- snaive(bricks1, h=20)           # preitas užfiksuotas sezonas yra naudojamas prognozuoti ateitį
 plot(snaive)
-plot(drift)
+
+drift <- rwf(bricks1, drift=TRUE, h=20)   # atsižvelgia į paskutinę duomenų reikšmę ir prideda vidutinį svyravimą
+plot(drift)                             
 ```
 
-(d) Compare the accuracy of your forecasts against the actual val-
-ues stored in bricks2.
+(d) Compare the accuracy of your forecasts against the actual values stored in bricks2.
+
+Štai prognozių tikslumas bricks2 duomenų atžvilgiu:
+
 ```{r}
-accuracy(vid,bricks2)
-accuracy(naive,bricks2)
-accuracy(snaive,bricks2)
-accuracy(drift,bricks2)
+kable(accuracy(vid,bricks2))
+kable(accuracy(naive,bricks2))
+kable(accuracy(snaive,bricks2))
+kable(accuracy(drift,bricks2))
 ```
+
+Kaip matome vid prognozė turi mažiausią vidutinę paklaidą (ME), tačiau didelis kitų paklaidų dydis. Snaive prognozei pavyksta gerai atspėti kita sezoną, šios prognozės paklaidos mažiausios iš nagrinėtų prognozių. Drift prognozėje atsižvelgiama į trendą, kurį šiuo atvejo nustelbia sezoniškumas paskutiniuose duomenyse.
+
+Manau pagal MPE nereikėtų rinktis modelio, nes šis rodiklis labiau aptinka paslinktumą, nes ne absoliučios reikšmės skaičiuojamos. Geriau naudoti MAPE rodiklį, nes ima absoliučius dydžius. Taigi naudingi rodikliai RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, MAPE: Mean Absolute Percentage Error, MASE: Mean Absolute Scaled Error, ACF1: Autocorrelation of errors at lag 1.
+
 (e) Which method does best? Why?
-Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Manau pagal MPE nereikėtų rinktis modelio, nes šis rodiklis labiau aptinka paslinktumą, nes ne absoliučios reikšmės skaičiuojamos. O kadangi MPE likusių modelių panašios, tai šis rodiklis nieko mums nepasako.
+
+Štai minėti rodikliai, tinkantys vertinant prognozes:
 
 ```{r}
+acf(bricksq)                            #kas keturis pikas, nurodantis metinį ketverčio sezoniškumą
+```
+
+vid prognozės rodikliai:
+   
+```{r}
+kable(accuracy(vid,bricks2)[,c(2,3,5,6,7)])      
+```
+
+
+naive prognozės rodikliai:
+```{r}
+kable(accuracy(naive,bricks2)[,c(2,3,5,6,7)])
+```
+
+
+snaive prognozės rodikliai:
+```{r}
+kable(accuracy(snaive,bricks2)[,c(2,3,5,6,7)])
+```
+
+
+drift prognozės rodikliai:
+```{r}
+kable(accuracy(drift,bricks2)[,c(2,3,5,6,7)])
+```
+
+Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Matome, kad geriausiai testuojamuose duomenyse pasirodė snaive metodas. Taip pat galime tarti, kad jis geresnis už paprastą naive metodą, nes snaive yra toks pat kaip naive, tik kad snaive dar atsižvelgiama į sezoniškumą, kuris buvo paskutinis duomenyse. Renkankantis tarp snaive ir drift modelių,
+pagal duomenis, galime manyti, kad ir ateityje panašus sezoniškumas gali atsikartoti, todėl snaive gan gerai prognozuotų lyginant su drift metodu (snaive būtent ir ima paskutinį sezoną kaip prognozę). O drift tinktų labiau už snaive, jei trendas būtų svarbiau už sezoniškumą, bet pagal paskutinius duomenis sezoniškumas yra svarbesnis(prielaida, kad bus panašus sezoniškumas ateityje), todėl renkuosi kaip geriausią modelį snaive.
+
+
+(f) For the best method, compute the residuals and plot them.
+
+Kaip matome yra dėsningumas tarp paklaidų. Jos koreliuoja, taigi nėra pats geriausias modelis, tačiau iš vertintų - geriausias.
+```{r}
+snaive=snaive(bricksq)
+res <- residuals(snaive)
+Acf(res)
+plot(res)
 
 ```
 
-(f) For the best method, compute the residuals and plot them. For
-example
-res <- residuals(f1)
-plot(res)
-hist(res, breaks="FD")
-Acf(res)
 Do the residuals appear to be uncorrelated and normally dis-
 tributed?
+
+Paklaidos koreliuotos ir neturi normalusiojo skirstinio, todėl nėra baltas triukšmas:
+
+```{r}
+hist(res, breaks="FD")
+Acf(res)
+shapiro.test(res)  #atmetame H0 hipotezę, jog paklaidos normaliosios.
