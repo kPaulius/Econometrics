@@ -1,0 +1,99 @@
+---
+title: "task 10 - 2"
+author: "Paulius Kostickis"
+date: "Thursday, April 21, 2016"
+output: html_document
+---
+
+2.For this exercise, use the monthly Australian short-term overseas visitors data, May 1985–April 2005. (Data set: visitors.)
+(a) Make a time plot of your data and describe the main features of the series.
+(b) Forecast the next two years using Holt-Winters’ multiplicative method.
+(c) Why is multiplicative seasonality necessary here?
+(d) Experiment with making the trend exponential and/or damped.
+(e) Compare the RMSE of the one-step forecasts from the various methods. Which do you prefer?
+(f) Check that the residuals from the best model look like white noise.
+
+```{r,include=FALSE}
+library(fpp)
+library(knitr)
+data=visitors
+```
+
+#### a) duomenų grafikas
+
+Matosi stiprėjantis sezoniškumas ir silpnėjantis trendas.
+```{r}```{r}
+tsdisplay(data, plot.type="scatter")
+```
+
+#### b) Holt-Winter multiplikatyvus metodas
+
+Matome prognozė gerai prisitaikiusi prie duomenų trendo ir sezoniškumo:
+```{r}
+fit1 <- hw(data, h=24, seasonal="mult")
+plot(fit1, plot.conf=FALSE)
+lines(fitted(fit1), col="RED")
+```
+
+#### c) Kodėl Holt-Winter multiplikatyvus metodas?
+
+Kadangi kylant duomenim proporcingai didėja ir sezoniškumo svyravimai, tuomet reikia į tai atsižvelgti prognozėje. Tai būtent ir padaro šis metodas.
+
+#### d) Eksponentinis ir slopinamasis metodai
+
+Šiuo atveju eksponentinis ir slopinamasis modelis labai tinka šiems duomenims, nes būtent slopinamajame metode mažėja trendo poveikis visai kaip šiuose duomenyse: 
+
+```{r}
+fit2 <- hw(data, h=24, seasonal="mult", exponential=TRUE)
+plot(fit2, plot.conf=FALSE)
+lines(fitted(fit2), col="RED")
+
+fit3 <- hw(data, h=24, seasonal="mult", exponential=TRUE,damped=TRUE)
+plot(fit3, plot.conf=FALSE)
+lines(fitted(fit3), col="RED")
+```
+
+Visos prognozės:
+```{r}
+par(mfrow=c(2,2))
+plot(data, xlim=c(1985,2007), ylim=c(50,650))
+lines(fit1$mean, col=4, lwd=1)
+plot(data, xlim=c(1985,2007), ylim=c(50,650))
+lines(fit2$mean, col=2)
+plot(data, xlim=c(1985,2007), ylim=c(50,650))
+lines(fit3$mean, col=3)
+plot(0, xlim=c(1985,2007), ylim=c(50,650))
+legend("topleft", lty=1, cex=0.8, lwd="1", col=c(4,2,3), legend=c("Holt-Winter multiplikatyvus metodas","Holt-Winter eksponentinis multiplikatyvus metodas","slopinamasis Holt-Winter multiplikatyvus metodas"))
+```
+
+
+#### e) RMSE modelių rodikliai
+```{r}
+kable(data.frame(Multiplikatyvus=accuracy(fit1)[2],eksponentinis_multiplikatyvus=accuracy(fit2)[2],Damped_multiplikatyvus=accuracy(fit3)[2]))
+```
+
+Geriausiai pasirodė fit3 - slopinamasis Holt-Winter multiplikatyvusis metodas, kuris atsižvelgia į trendo mažėjimą ir sezoniškumo didėjimą.
+
+#### f) Ar liekanos baltasis triukšmas?
+
+Liekanų vidurkis yra lygus beveik 0, nėra koreliacijos tarp liekanų. O normaliojo skirstinio teste gali būti atmesta nulinė hipotezė, kad liekanos neturi normaliojo skirstinio, jei reikšmingumo lygmuo 0,05. Tačiau, jei reikšmingumo lygmuo 0,01, tada negalime tarti, kad liekanos turi normalųjį skirstinį. 
+
+```{r}
+Acf(fit3$res, main="ACF of residuals")
+shapiro.test(fit3$res)
+```
+
+Iš histogramos liekanos neatrodo normaliai pasiskirčiusios:
+```{r}
+plot(fit3$res)
+hist(fit3$res, nclass="FD", main="Histogram of residuals")
+```
+
+Tačiau palyginę grafikus(baltojo triukšmo grafikas ir liekanų grafikas):
+```{r}
+par(mfrow=c(1,2))
+plot(x=1:length(fit3$res),y=rnorm(length(fit3$res),0,1),type="l", main="baltasis triukšmas",ylab="reikšmė", xlab="laikas")
+plot(fit3$res, main="liekanų grafikas",ylab="liekanos", xlab="laikas")
+```
+
+Galime sakyti liekanos yra baltasis triukšmas.

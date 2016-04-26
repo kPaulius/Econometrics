@@ -21,45 +21,122 @@ library(fpp)
 library(knitr)
 
 ```
-y = cumsum(rnorm(300))
-plot(y, type="l", main="eksponentinis glodinimas")
 
-alpha = 0.5
-l1 = filter(y*alpha, f=1-alpha,method = "recursive")
-lines(l1, col=2)
-
-
-alpha = 0.2
-l1 = filter(y*alpha, f=1-alpha,method = "recursive")
-lines(l1, col=3)
-
-
-alpha = 0.1
-l1 = filter(y*alpha, f=1-alpha,method = "recursive")
-lines(l1, col=4)
-
-
-
+Duomenyse matomas trendas ir ciklai: 
 
 ```{r}
-tsdisplay(eggs, plot.type="scatter")   # matomas trendas ir ciklai
-fit=holt(eggs,h=100,exponential=T)
-plot(fit)
-plot(fit$model)
-plot(fit, plot.conf=FALSE)
-lines(fitted(fit), col="red")
-fit$model
+tsdisplay(eggs, plot.type="scatter")
+```
 
-fit2 <- ses(eggs)
-plot(fit2$model)
+###Holt tiesinis glodinimas su trendu
+
+Alfa ir betos buvo parinktos pačios programos:
+
+```{r}
+fit1=holt(eggs,h=100,initial="optimal",exponential=F,damped=F)
+plot(fit1, plot.conf=FALSE)
+lines(fitted(fit1), col="red")
+x1=fit1$model        # alfa = 0.82  beta = 0.0001
+```
+
+
+Pakeisime parametrus patys:
+
+```{r}
+fit12=holt(eggs,alpha=0.6, beta = 0.0001, h=100,exponential=F,damped=F)
+plot(fit12, plot.conf=FALSE)
+lines(fitted(fit12), col="red")
+x2=fit12$model       # alfa = 0.6  beta = 0.0001 
+
+
+fit13=holt(eggs,alpha=0.82, beta=0.2, h=100,exponential=F,damped=F)
+plot(fit13, plot.conf=FALSE)
+lines(fitted(fit13), col="red")
+x3=fit13$model       # alfa = 0.82  beta = 0.2
+```
+
+Matome, sumažinus alfą nuo optimalių parametrų, glodinti duomenys pasislenka daugiau į dešinę nuo duomenų (daugiau atsilieka).
+O padidinus beta nuo optimalių parametrų, glodinti duomenys stipriau šokinėja aplink duomenis.
+Tai galima buvo numatyti žvelgiant iš teorinės pusės, nes sumažinus alfą, didės preitų duomenų įtaka glodinimui. O padidinus betą, mažės glodnumas, atsiras stipresnis šokinėjimas, dėl didesnės sezoniškumo daromos įtakos glodinimui.
+
+
+###Holt eksponentinis glodinimas su trendu
+
+Alfa ir betos buvo parinktos pačios programos:
+
+```{r}
+
+fit2=holt(eggs,h=100,initial="optimal",exponential=T,damped=F)
 plot(fit2, plot.conf=FALSE)
-lines(fit$mean, col="red")
+lines(fitted(fit2), col="red")
+x4=fit2$model        # alfa = 0.82  beta = 0.0001
+```
 
 
-summary(fit)
-alpha = 0.5
-l1 = filter(eggs*alpha, f=1-alpha,method = "recursive")
-lines(l1, col=2)
-mod$components
-plot(mod)
+Pakeisime parametrus patys:
+
+```{r}
+fit22=holt(eggs,alpha=0.6, h=100,exponential=T,damped=F)
+plot(fit22, plot.conf=FALSE)
+lines(fitted(fit22), col="red")
+x5=fit22$model       # alfa = 0.6  beta = 0.0001 
+
+
+fit23=holt(eggs,beta=0.2, h=100,exponential=T,damped=F)
+plot(fit23, plot.conf=FALSE)
+lines(fitted(fit23), col="red")
+x6=fit23$model       # alfa = 0.82  beta = 0.2
+
+```
+
+Matome, sumažinus alfą nuo optimalių parametrų, duomenys tampa glodesni.
+O padidinus beta nuo optimalių parametrų, glodinti duomenys stipriau šokinėja aplink duomenis.
+
+
+###Holt slopinamas glodinimas su trendu
+
+Alfa,betos ir fi buvo parinktos pačios programos, eksponentiniui ir tiesiniu atvejais:
+
+```{r}
+fit3=holt(eggs,h=100,initial="optimal",exponential=T,damped=T)
+plot(fit3, plot.conf=FALSE)
+lines(fitted(fit3), col="red")
+x7=fit3$model        # alfa = 0.83  beta = 0.0001,  fi = 0.89
+
+fit4=holt(eggs,h=100,initial="optimal",exponential=F,damped=T)
+plot(fit4, plot.conf=FALSE)
+lines(fitted(fit4), col="red")
+x8=fit4$model        # alfa = 0.84  beta = 0.0001,  fi = 0.8
+```
+
+Gaunama beveik identiški grafikai, kai naudajami otimalūs parametrai slopinamu atveju tiek eksponentiniui ir tiek tiesiniu atvejais.
+
+###Prognozių lyginimas:
+
+```{r}
+plot(eggs, xlim=c(1900,2050), ylim=c(-50,500))
+lines(fit1$mean, col=3)
+lines(fit2$mean, col=2)
+lines(fit3$mean, col=4)
+lines(fit22$mean, col=5)
+legend("topright",lty=1,lwd="1",col=c(3,2,4,5),legend=c("Holt tiesinis metodas","Holt eksponentinis metodas","Damped Holt metodas","Holt eksponentinis metodas, kai alpha=0.6, beta=0.0001"))
+```
+
+RMSE paklaidų rodikliai:
+```{r}
+kable(data.frame(tiesinis_metodas=accuracy(fit1)[2],eksponentinis_metodas=accuracy(fit2)[2],Damped_metodas=accuracy(fit3)[2],eksponentinis_a_0.6__b_0.0001=accuracy(fit22)[2]))
+```
+
+Holt eksponentinis glodinimas turėjo mažiausią paklaidą.
+
+###Tikriname ar Holt eksponentinio glodinimo paklaidos yra baltasis triukšmas
+
+
+Iš ACF matome, kad liekanos nekoreliuotos, vidurkis beveik 0, turi normalųjį skirstinį ir iš grafiko matosi, kad liekanos baltasis triukšmas:
+
+```{r}
+Acf(fit2$res)
+shapiro.test(fit2$res)
+mean(fit2$res)
+plot(fit2$res)
 ```

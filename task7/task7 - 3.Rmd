@@ -8,38 +8,36 @@ library(knitr)
 ```
 
 3. For the data set bricksq:
-(a) Split the data into two parts
+####(a) Split the data into two parts
 ```{r}
 bricks1 <- window(bricksq, end=1987.99)
 bricks2 <- window(bricksq, start=1988)
 ````
-(b) Check that your data have been split appropriately by produc-
+####(b) Check that your data have been split appropriately by producing the following plot.
 
-ing the following plot.
 ```{r}
-plot(bricksq)
+plot(bricksq,main="bricksq duomenys")
 lines(bricks1,col="red")
 lines(bricks2,col="blue")
 legend("topleft",legend= c("iki 1988", "nuo 1988"),col = c("RED","BLUE"),lty=1)
 ````
 
-(c) Calculate forecasts using each of the four benchmark methods
-applied to bricks1.
+####(c) Calculate forecasts using each of the four benchmark methods applied to bricks1.
 ```{r}
 vid <- meanf(bricks1, h=20)               # prognozė, lygi duomenų vidurkiui
-plot(vid)
+plot(vid, main="vid prognozė")  
 
 naive <- naive(bricks1, h=20)             # prognozė, kuri atsižvelgia tik į paskutinę duomenų reikšmę
-plot(naive)
+plot(naive, main="naive prognozė")  
 
 snaive <- snaive(bricks1, h=20)           # preitas užfiksuotas sezonas yra naudojamas prognozuoti ateitį
-plot(snaive)
+plot(snaive, main="snaive prognozė")  
 
 drift <- rwf(bricks1, drift=TRUE, h=20)   # atsižvelgia į paskutinę duomenų reikšmę ir prideda vidutinį svyravimą
-plot(drift)                             
+plot(drift, main="drift prognozė")                             
 ```
 
-(d) Compare the accuracy of your forecasts against the actual values stored in bricks2.
+####((d) Compare the accuracy of your forecasts against the actual values stored in bricks2.
 
 Štai prognozių tikslumas bricks2 duomenų atžvilgiu:
 
@@ -50,53 +48,69 @@ kable(accuracy(snaive,bricks2))
 kable(accuracy(drift,bricks2))
 ```
 
-Kaip matome vid prognozė turi mažiausią vidutinę paklaidą (ME), tačiau didelis kitų paklaidų dydis. Snaive prognozei pavyksta gerai atspėti kita sezoną, šios prognozės paklaidos mažiausios iš nagrinėtų prognozių. Drift prognozėje atsižvelgiama į trendą, kurį šiuo atvejo nustelbia sezoniškumas paskutiniuose duomenyse.
+Kaip matome vid prognozė turi mažiausią vidutinę paklaidą (ME), tačiau didelis kitų paklaidų dydis. Snaive prognozei pavyksta gerai atspėti kita sezoną, šios prognozės paklaidos mažiausios iš nagrinėtų prognozių. Drift prognozėje atsižvelgiama į trendą.
 
-Manau pagal MPE nereikėtų rinktis modelio, nes šis rodiklis labiau aptinka paslinktumą, nes ne absoliučios reikšmės skaičiuojamos. Geriau naudoti MAPE rodiklį, nes ima absoliučius dydžius. Taigi naudingi rodikliai RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, MAPE: Mean Absolute Percentage Error, MASE: Mean Absolute Scaled Error, ACF1: Autocorrelation of errors at lag 1.
+Manau pagal MPE ir ME nereikėtų rinktis modelio, nes ne absoliučios reikšmės skaičiuojamos. Geriau naudoti RMSE rodiklį, nes ima absoliučius dydžius ir padidina mažina išskirčių turinčias prognozės patrauklumą, nes paklaidos pakeliamos kvadratu. Taip pat labai patogus MAE rodiklis, nes imamos absoliučių paklaidų vidurkis. Taigi naudingi rodikliai RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, šiuo atveju mažai kreipsiu dėmesį į MAPE: Mean Absolute Percentage Error, MASE: Mean Absolute Scaled Error, ACF1: Autocorrelation of errors at lag 1.
 
-(e) Which method does best? Why?
-
-Štai minėti rodikliai, tinkantys vertinant prognozes:
-
-```{r}
-acf(bricksq)                            #kas keturis pikas, nurodantis metinį ketverčio sezoniškumą
-```
-
+Taigi žiūrėsime į naudingiausius rodiklius.
 vid prognozės rodikliai:
-   
 ```{r}
-kable(accuracy(vid,bricks2)[,c(2,3,5,6,7)])      
+kable(accuracy(vid,bricks2)[,c(2,3)])      
 ```
 
 
 naive prognozės rodikliai:
 ```{r}
-kable(accuracy(naive,bricks2)[,c(2,3,5,6,7)])
+kable(accuracy(naive,bricks2)[,c(2,3)])
 ```
 
 
 snaive prognozės rodikliai:
 ```{r}
-kable(accuracy(snaive,bricks2)[,c(2,3,5,6,7)])
+kable(accuracy(snaive,bricks2)[,c(2,3)])
 ```
 
 
 drift prognozės rodikliai:
 ```{r}
-kable(accuracy(drift,bricks2)[,c(2,3,5,6,7)])
+kable(accuracy(drift,bricks2)[,c(2,3)])
 ```
 
-Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Matome, kad geriausiai testuojamuose duomenyse pasirodė snaive metodas. Taip pat galime tarti, kad jis geresnis už paprastą naive metodą, nes snaive yra toks pat kaip naive, tik kad snaive dar atsižvelgiama į sezoniškumą, kuris buvo paskutinis duomenyse. Renkankantis tarp snaive ir drift modelių,
-pagal duomenis, galime manyti, kad ir ateityje panašus sezoniškumas gali atsikartoti, todėl snaive gan gerai prognozuotų lyginant su drift metodu (snaive būtent ir ima paskutinį sezoną kaip prognozę). O drift tinktų labiau už snaive, jei trendas būtų svarbiau už sezoniškumą, bet pagal paskutinius duomenis sezoniškumas yra svarbesnis(prielaida, kad bus panašus sezoniškumas ateityje), todėl renkuosi kaip geriausią modelį snaive.
+Naive ir drift rodikliai labai panašūs, tačiau naive geresni test set'e. Vid prognozės rodikliai prasčiausi visuose duomenyse. Snaive geriausiai pasirodė test set'e, bet training set'e blogiau pasirodė už naive ir vid metodus. 
+
+####((e) Which method does best? Why?
 
 
-(f) For the best method, compute the residuals and plot them.
-
-Kaip matome yra dėsningumas tarp paklaidų. Jos koreliuoja, taigi nėra pats geriausias modelis, tačiau iš vertintų - geriausias.
 ```{r}
-snaive=snaive(bricksq)
-res <- residuals(snaive)
-Acf(res)
+tsdisplay(bricksq, plot.type="scatter")      #kas keturis pikas, nurodantis metinį ketverčio sezoniškumą, matomi ciklai
+```
+
+Metodų ir duomenų grafikas:
+
+(idėja gauta https://www.otexts.org/fpp/2/5)
+```{r}
+plot(bricksq, main="bricksq duomenys",
+  ylab="", xlab="metai", xlim=c(1956,2005))
+lines(meanf(bricks2,h=20)$mean, col=4)
+lines(rwf(bricks2,h=20)$mean, col=2)
+lines(rwf(bricks2,drift=TRUE,h=20)$mean, col=3)
+lines(snaive(bricks2,h=20)$mean, col=5)
+legend("topleft", lty=1, col=c(4,2,3,5),
+  legend=c("Mean metodas","Naive metodas","Drift metodas","Snaive metodas"))
+lines(bricks2)
+
+```
+
+Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Matome, kad šitie paprasti metodai prastai prognozuoja, tačiau drift metodas atrodo geriausiai ir paklaidos yra nedidelės palyginus su kitais metodais.
+
+
+####((f) For the best method, compute the residuals and plot them.
+
+Kaip matome yra dėsningumas tarp paklaidų:
+
+```{r}
+drift=rwf(bricks2,drift=TRUE,h=20)
+res <- residuals(drift)
 plot(res)
 
 ```
@@ -104,7 +118,7 @@ plot(res)
 Do the residuals appear to be uncorrelated and normally dis-
 tributed?
 
-Paklaidos koreliuotos ir neturi normalusiojo skirstinio, todėl nėra baltas triukšmas:
+Paklaidos koreliuoja, taigi tikėtina, jog modelis galėtų būti pagerintas, tačiau iš vertintų - geriausias. Paklaidos koreliuotos ir neturi normalusiojo skirstinio, nėra baltas triukšmas:
 
 ```{r}
 hist(res, breaks="FD")

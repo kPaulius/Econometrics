@@ -17,17 +17,22 @@ data set. Which do you think is best? Why?
 
 library(fpp)
 ````
+####a)Produce a time plot of the series.
+
 Duomenyse matomas trendas, nėra sezoniškumo:
 ```{r}
 data=dowjones
 plot(data)                                                # a) dalis, išbrėžiami duomenys
+```
 
-
+####b) Produce forecasts using the drift method and plot them.
+```{r}
 x=rwf(data, drift=TRUE, h=30)                             # b) dalis, draft prognozė 
 plot(x)
 ```
+Atsižvelgia į trendą. trendas su random walk.
 
-
+####(c) Show that the graphed forecasts are identical to extending the line drawn between the first and last observations
 ```{r,message=F}
 plot(x)                                                   # c) dalis, įrodome, kad sujungus pirmą ir
 lines(c(0,78),c(data[1],data[78]),lwd= 2, col="BLUE")     #    paskutinį tašką, gauname tokį patį rezultatą
@@ -36,10 +41,21 @@ lines(c(0,78),c(data[1],data[78]),lwd= 2, col="BLUE")     #    paskutinį tašk�
 ```
 
 
-d) vidurkio prognozė. Ji yra prastesnė, nes neatsižvelgia į trendą ir pasikliautiniai intervalai yra labai dideli palyginus su drift metodo, todėl drift metodas geresnis:
+####d)Try some of the other benchmark functions to forecast the same data set. 
+
+vidurkio prognozė:
 ```{r}
 y=meanf(data, h=30)                                       
 plot(y)                                                       
 
 ```
+
+Naive prognozė:
+```{r}
+y=naive(data, h=30)                                       
+plot(y)                                                       
+tsdisplay(data, plot.type="scatter")
+```
+
+Vidurkio prognozė yra prastesnė, nes akivaizdus trūkio taškas. Tiktų naive arba drift metodas. Kadangi paskutiniai duomenys pradėjo ir leistis, galime tik spėti ar kiti duomenys kris ar kils. Todėl rinkčiausi naive modelį, nes prognozė nei kyla nei leidžiasi, tinka šiame neužtikrintume dėl ateities.
 

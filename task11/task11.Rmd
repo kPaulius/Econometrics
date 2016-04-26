@@ -1,0 +1,70 @@
+---
+title: "task11"
+author: "Paulius Kostickis"
+date: "Saturday, April 23, 2016"
+output: html_document
+---
+[@Hyndman2014a, ch. 3., Lab Session 4]
+
+Lab Session 4, užduotis nr. 1
+Use ets() to find the best ETS model for the price of eggs (data set eggs). How does this model compare to the one you found in the previous lab session?
+
+```{r,include=F}
+library(fpp)
+library(knitr)
+```
+
+ETS geriausias modelis duomenims eggs:
+```{r}
+data <- eggs
+fit <- ets(data)
+fit
+```
+
+ETS(M,N,N) (multiplikatyvios paklaidos, nėra trendo, nėra sezoniškumo).
+
+
+####Prognozės grafikas:
+```{r}
+forecast <- forecast(fit, h=100)
+plot(forecast) #visos prognozuojamos reikšmės lygios
+```
+
+
+Lab Session 3 užduotyje nr. 1 kaip geriausias variantas buvo parinktas šis:
+
+```{r}
+fit2 <- holt(data,h=100,initial="optimal",exponential=T,damped=F)
+plot(fit2, plot.conf=FALSE)
+```
+
+
+Modelių prognozių palyginimas:
+
+```{r}
+plot(data, xlim=c(1900,2090), ylim=c(-50,400))
+lines(forecast$mean, col=3)
+lines(fit2$mean, col=2)
+legend("topright", lty=1, lwd="1", col=c(3,2), legend=c("ETS(M,N,N)", "Holt eksponentinis metodas"))
+```
+
+
+
+Palyginame modelių AIC:
+```{r}
+fit[2]
+fit2$model[2]
+```
+
+ETS modelio AIC yra mažesnis, pagal tai ETS yra geresnis.
+
+Iš ACF matome, kad liekanos nekoreliuotos, vidurkis beveik 0, turi normalųjį skirstinį ir iš grafiko matosi, kad liekanos baltasis triukšmas:
+
+```{r}
+Acf(fit$res)
+shapiro.test(fit$res)
+mean(fit$res)
+plot(fit$res)
+```
+
+Pagal AIC, modelis ETS() yra geresnis už Holt eksponentinį prognozavimą. ETS prognozuojama kiaušinių kaina yra stabili.

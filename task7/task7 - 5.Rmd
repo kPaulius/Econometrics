@@ -13,8 +13,7 @@ library(fpp)
 library(knitr)
 ```
 
-(a) Produce some plots of the data in order to become familiar
-with it.
+####((a) Produce some plots of the data in order to become familiar with it.
 
 Matomas metinis sezoniškumas (kas 12 lag'ų), matomi ciklai, nėra trendo.
 ```{r}
@@ -23,8 +22,7 @@ tsdisplay(hsales, plot.type="scatter")
 
 
 
-(b) Split the data into a training set and a test set, where the test
-set is the last two years of data.
+####((b) Split the data into a training set and a test set, where the test set is the last two years of data.
 
 ```{r}
 data1 <- window(hsales, end=1993.99)    #duomenų padalinimas į du time series 
@@ -39,11 +37,11 @@ lines(data2,col="blue")
 legend("topleft",legend= c("iki 1994", "nuo 1994"),col = c("RED","BLUE"),lty=1)    
 ```
 
-(c) Try various benchmark methods to forecast the training set and
-compare the results on the test set. Which method did best?
+####((c) Try various benchmark methods to forecast the training set and compare the results on the test set. Which method did best?
 
 Naudosime paprasčiausius modelius: mean, naive, snaive ir drift:
 ```{r}
+par(mfrow=c(2,2))
 vid <- meanf(data1, h=20)               # prognozė, lygi duomenų vidurkiui
 plot(vid)
 
@@ -59,7 +57,7 @@ plot(drift)                             # vidutinis svyravimas yra mažai nutol�
 
 Matomas metinis sezoniškumas (pikas kas 12 lag'ų):
 ```{r}
-Acf(hsales)                         
+Acf(hsales)       
 ```
 
 vid prognozės rodikliai:
@@ -72,11 +70,9 @@ drif prognozės rodikliai:
 kable(accuracy(drift,data2)[,c(2,3,5,6,7)])
 ```
 
-Drift metodas pasirodė geriau už vid training duomenyse, tačiau test duomenyse - vid metodas. Kadangi test duomenų labai mažai, manytina, jog pagal training duomenis geriau rinktis metodą šiuo atveju, nes tik4tina geriau prognozuos ilguoju laikotarpiu.
+Drift metodas pasirodė geriau už vid training duomenyse, tačiau test duomenyse - vid metodas. Kadangi test duomenų labai mažai, manytina, jog pagal training duomenis geriau rinktis drift metodą.
 
-
-Šiuo atveju, snaive galbūt atspės sezoniškumą, tačiau galime matyti, kad preiti sezonai buvo labai skirtingi negu paskutinysis (žiurint į grafikus). 
-
+Iš grafikų matome, kad snaive neblogai atspėjo duomenis:
 ```{r}
 par(mfrow=c(1,2))
 plot(hsales)
@@ -91,13 +87,12 @@ legend("topleft",legend= c("iki 1994", "nuo 1994"),col = c("RED","BLUE"),lty=1)
 plot(snaive)
 ```
 
-Tačiau šiuo atveju rinkčiausi snaive kaip geresnį metodą vietoj naive, nes gerai atspėjo paskutinius duomenis (geresnis modelis trumpuoju laikotarpiu):
+Tačiau snaive daug blogiau pasirodo training set'e, todėl geresnis yra naive metodas.
 
 naive prognozės rodikliai:
 ```{r}
 kable(accuracy(naive,data2)[,c(2,3,5,6,7)])
 ```
-
 
 snaive prognozės rodikliai:
 ```{r}
@@ -105,31 +100,25 @@ kable(accuracy(snaive,data2)[,c(2,3,5,6,7)])
 ```
 
 
-Lyginam drift prieš snaive ir naive metodus:
+Lyginam drift prieš naive metodus:
 
-vid prognozės rodikliai:
+drift prognozės rodikliai:
 ```{r}
 kable(accuracy(drift,data2)[,c(2,3,5,6,7)])      
 ```
 
-snaive prognozės rodikliai:
+naive prognozės rodikliai:
 ```{r}
 kable(accuracy(naive,data2)[,c(2,3,5,6,7)])
 ```
 
-naive prognozės rodikliai:
-```{r}
-kable(accuracy(snaive,data2)[,c(2,3,5,6,7)])
-```
-
-Snaive pasirodė geriausiai testuojamuose duomenyse ir galbūt gali gerai atspėti būsimą sezoniškumą netolimoj ateityje, trumpuoju laikotarpiu (nors ankstesniuose duomenyse sezono metu įgautos reikšmės smarkiai skyrėsi), tai jei reikia prognozuoti trumpą laikotarpį, rinkčiausi snaive metodą. Tačiau jeigu reiktų rinktis ilgam laikotarpiui metodą, rinkčiausi drift metodą, nes jo prognozė remiasi visais praeities duomenimis, nors realiai drift ir naive metodai labai panašūs pagal paklaidas, rodiklius.
+Rodikliai beveik sutampa, bet rinksimes drift metodą, nes šis labiau prisiderina prie duomenų, o duomenys koreliuoti.
 
 RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, MAPE: Mean Absolute Percentage Error, MASE: Mean Absolute Scaled Error, ACF1: Autocorrelation of errors at lag 1.
 
 
 
-(d) For the best method, compute the residuals and plot them.
-What do the plots tell you?
+####((d) For the best method, compute the residuals and plot them. What do the plots tell you?
 
 Šiuo atveju reikia metodo ilgam laikotarpiui, tad pasirinksiu drift metodą kaip geriausią.
 Kaip matome yra dėsningumas tarp paklaidų. Jos koreliuoja ir nėra baltas triukšmas, taigi nėra pats geriausias modelis, tačiau iš vertintų - geriausias prognozuojant naujausius duomenis: 
@@ -146,7 +135,6 @@ shapiro.test(res)        # neatmetame H0 hipotezę, jog paklaidos normaliosios.
 
 
 
-(e) Can you invent a better forecasting method than any of the
-benchmark methods for these data?
+####((e) Can you invent a better forecasting method than any of the benchmark methods for these data?
 
 Jos koreliuoja ir nėra baltas triukšmas, taigi nėra pats geriausias modelis. Tačiau iš vertintų - geriausias prognozuojant  duomenis ilguoju laikotarpiu. 

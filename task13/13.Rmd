@@ -1,0 +1,117 @@
+---
+title: "task13"
+author: "Paulius Kostickis"
+date: "Monday, April 25, 2016"
+output: html_document
+---
+
+1. For the following series, find an appropriate Box-Cox transformation
+and order of differencing in order to obtain stationary data.
+(a) usnetelec
+(b) usgdp
+(c) mcopper
+(d) enplanements
+(e) visitors
+
+```{r, include=F}
+library(fpp)
+library(knitr)
+```
+
+#### Funkcija skirta transformuoti duomenis ir išbrėžti transformuotus stacionarius ir pradinius duomenis
+
+(Funkciją "grafikas" sukūriau pats, dvi eilutės automatinio diferencijavimo buvo rastos "fpp" knygoje)
+```{r}
+grafikas <-function(data, sez){
+  par(mfrow=c(1,3))
+  ns=0                                                                  #kad nebūtų klaidinama kiek kartų differencijuota
+  lambda = BoxCox.lambda(data)                                          #randamas lambda  
+  trdiff = BoxCox(data,lambda = lambda)                                 #transformuojami duomenys
+  
+  if(sez==T){                                                           #naikinamas sezoniškumo įtaka, jei yra sezoniškumas
+    ns <- nsdiffs(trdiff)
+    if(ns>0)
+      trdiff <- diff(trdiff,lag=frequency(trdiff), differences=ns)
+  }
+  
+  nd <- ndiffs(trdiff)                                                  #diferencijuojama, jei trendas yra
+  if(nd > 0)
+    trdiff <- diff(trdiff,differences=nd)
+  
+  plot(data, main="pradinis")                                           #pradinių duomenų grafikas
+  plot(trdiff, ylab="pokytis", main= "stacionarus")     
+  acf(trdiff, main = "nera nei sezoniskmo nei trendo")                  #stacionarių duomenų grafikas
+  p=kpss.test(trdiff)$p.value
+  
+    return(kable(data.frame(trendo_diferencijavimas = nd , sezono_diferencijavimas = ns, iš_viso_diferencijuota = nd + ns,Lambda = lambda, p_reiksme=p)))                                                  #atspausdinama statistinė lentelė
+}
+
+```
+
+####(a) usnetelec
+Matome, kad tik trendas yra. Galutinė laiko eilutė stacionari, teste neatmetame H0, kad laiko eilutė stacionari.
+```{r}
+acf(usnetelec)
+grafikas(usnetelec,F) #tik su trendu
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+####(b) usgdp
+Matome, kad tik trendas yra. Galutinė laiko eilutė stacionari, teste neatmetame H0, kad laiko eilutė stacionari.
+```{r}
+acf(usgdp)           #tik su trendu, taigi funkcijoje tai pažymėsime
+grafikas(usgdp,F)
+
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+####(c) mcopper
+```{r}       
+acf(mcopper)         #tik su trendu, taigi funkcijoje tai pažymėsime
+grafikas(mcopper,F)
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+####(d) enplanements
+```{r}
+acf(enplanements)    #matosi sezoniškumas, taigi funkcijoje tai pažymėsime
+grafikas(enplanements,T)
+
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+####(e) visitors
+```{r}
+acf(visitors)   #matosi sezoniškumas, taigi funkcijoje tai pažymėsime
+grafikas(visitors,T)       
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+2. Why is a Box-Cox transformation unhelpful for the cangas data?
+```{r}
+acf(cangas)     #matosi sezoniškumas, taigi funkcijoje tai pažymėsime
+grafikas(cangas,T)
+```
+
+Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+
+Nors testas sako, kad stacionari, tačiau matomas aiškus
+3. Download the data at http://robjhyndman.com/data/retail.xls.
+Choose one of the series and find an appropriate Box-Cox transformation
+and order of differencing in order to obtain stationary data.
+
+```{r}
+data=read.csv("retail.csv")
+```
+
+Renkuosi 6-tą duomenų stulpelį
+```{r}
+data=ts(data[,7],start=c(1982,5), frequency=12)
+acf(data)
+grafikas(data,F)                               #tik su trendu, taigi funkcijoje tai pažymėsime
+```
