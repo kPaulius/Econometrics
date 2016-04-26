@@ -98,9 +98,8 @@ acf(cangas)     #matosi sezoniškumas, taigi funkcijoje tai pažymėsime
 grafikas(cangas,T)
 ```
 
-Kadangi p value > 0.05, neatmetame H0 - laiko eilutė stcionari.
+Matosi, kad transformuotų duomenų sklaida vistiek didelė, taigi Box-Cox transformacija nepadėjo.
 
-Nors testas sako, kad stacionari, tačiau matomas aiškus
 3. Download the data at http://robjhyndman.com/data/retail.xls.
 Choose one of the series and find an appropriate Box-Cox transformation
 and order of differencing in order to obtain stationary data.
