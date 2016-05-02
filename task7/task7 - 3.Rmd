@@ -101,7 +101,7 @@ lines(bricks2)
 
 ```
 
-Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Matome, kad šitie paprasti metodai prastai prognozuoja, tačiau drift metodas atrodo geriausiai ir paklaidos yra nedidelės palyginus su kitais metodais.
+Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kitų modelių. Matome, kad šitie paprasti metodai prastai prognozuoja, tačiau naive metodas atrodo geriausiai ir paklaidos yra nedidelės palyginus su kitais metodais, o test set'e geriau pasirodė už drift.
 
 
 ####((f) For the best method, compute the residuals and plot them.
@@ -109,7 +109,7 @@ Tikrai galime atmesti vidurkio metodą, nes jų paklaidos daug didesnės nei kit
 Kaip matome yra dėsningumas tarp paklaidų:
 
 ```{r}
-drift=rwf(bricks2,drift=TRUE,h=20)
+naive=naive(bricks2,h=20)
 res <- residuals(drift)
 plot(res)
 
@@ -118,9 +118,8 @@ plot(res)
 Do the residuals appear to be uncorrelated and normally dis-
 tributed?
 
-Paklaidos koreliuoja, taigi tikėtina, jog modelis galėtų būti pagerintas, tačiau iš vertintų - geriausias. Paklaidos koreliuotos ir neturi normalusiojo skirstinio, nėra baltas triukšmas:
+Paklaidos koreliuoja, taigi tikėtina, jog modelis galėtų būti pagerintas, tačiau iš vertintų - geriausias. Paklaidos koreliuotos, nėra baltas triukšmas:
 
 ```{r}
 hist(res, breaks="FD")
 Acf(res)
-shapiro.test(res)  #atmetame H0 hipotezę, jog paklaidos normaliosios.

@@ -112,7 +112,7 @@ naive prognozės rodikliai:
 kable(accuracy(naive,data2)[,c(2,3,5,6,7)])
 ```
 
-Rodikliai beveik sutampa, bet rinksimes drift metodą, nes šis labiau prisiderina prie duomenų, o duomenys koreliuoti.
+Rodikliai beveik sutampa, bet rinksimes naive metodą, nes šis geriau pasirodė test duomenyse.
 
 RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, MAPE: Mean Absolute Percentage Error, MASE: Mean Absolute Scaled Error, ACF1: Autocorrelation of errors at lag 1.
 
@@ -124,12 +124,12 @@ RMSE: Root Mean Squared Error, MAE: Mean Absolute Error, MAPE: Mean Absolute Per
 Kaip matome yra dėsningumas tarp paklaidų. Jos koreliuoja ir nėra baltas triukšmas, taigi nėra pats geriausias modelis, tačiau iš vertintų - geriausias prognozuojant naujausius duomenis: 
 
 ```{r}
-dritf= rwf(hsales, drift=TRUE)
-res <- residuals(drift)
+naive= naive(hsales)
+res <- residuals(naive)
 Acf(res)                 # paklaidos yra koreliuotos
 plot(res)                # matosi šioks toks dėsningumas, nėra baltas triukšmas
-hist(res, breaks="FD")   # atrodo kaip normalusis skirtstinys
-shapiro.test(res)        # neatmetame H0 hipotezę, jog paklaidos normaliosios.
+hist(res, breaks="FD")   # neatrodo kaip normalusis skirtstinys
+shapiro.test(res)        # atmetame H0 hipotezę, jog paklaidos normaliosios. Paklaidos neturi normaliojo skirstinio
 
 ```
 

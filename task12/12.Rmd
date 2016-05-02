@@ -101,87 +101,27 @@ of models to fit.)
 
 
 ```{r}
-u=c("A","M")
-j=c("N","A")  # su M blogai
-f=c("N","A")  # su M blogai
-
-fit <- ets(train, "MAM", damped=FALSE) 
-fit <- ets(train, "MMM", damped=T) 
-
-modRMSE <- function(q,w,r,ToF){                                       
-  for(i in k:(n-1)){
-    train <- ts(data[1:i],freq=12)                                  #sukuriami train duomenys
-    fit <- ets(train, paste(c(q,w,r),collapse=""), damped=ToF)      #sukuriamas geriausias metodas su ets(M,A,M)
-                                                                    #train duomenyse
-    fc <- forecast(fit,h=1)$mean                                    #prognozė vienui žingsniui į priekį nuo 
-                                                                    #paskutintos train reikšmės
-    e[i] <- data[i+1]-fc                                            #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
-                                                                    #atitinkamą vektoriaus vietą
-  }
-      
-  return(sqrt(mean(e^2,na.rm=TRUE)))                #RMSE prognozės naudojant training set'e.    
-}
-
-
-modeliai=NA
-for(q in u){
-  for(w in j){
-    for(r in f){
-      
-      e=modRMSE(q,w,r,F)
-      pav=paste(c(q,w,r),collapse="")
-      modelis=c(pav,e)
-      modeliai = data.frame(modeliai,modelis)
-      
-      if(w!="N"){
-        e=modRMSE(q,w,r,T)
-        pav=paste(c(q,w,"d",r),collapse="")
-        modelis=c(pav,e)
-        modeliai = data.frame(modeliai,modelis)
-      
-      }
-        
-    }
-  }
-}
-modeliai=data.frame(modeliai[,-1])
-
-for(q in u){
-  for(w in j){
-    for(r in f){
-      
-      e=modRMSE(q,w,r,F)
-      pav=paste(c(q,w,r),collapse="")
-      modelis=c(pav,e)
-      modeliai = data.frame(modeliai,modelis)
-        
-    }
-  }
-}
-modeliai=data.frame(modeliai[,-1])
-
-###############################
-
-                                     
+                 
 for(i in k:(n-1)){
-  train <- ts(data[1:i],freq=12)                                  #sukuriami train duomenys
-  fit <- ets(train)                                 #sukuriamas geriausias metodas su ets(M,A,M)
-                                                                    #train duomenyse
-  fc <- forecast(fit,h=1)$mean                                    #prognozė vienui žingsniui į priekį nuo 
-                                                                    #paskutintos train reikšmės
-  e[i] <- data[i+1]-fc                                            #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
-                                                                    #atitinkamą vektoriaus vietą
+  train <- ts(data[1:i],freq=12)        #sukuriami train duomenys
+  fit <- ets(train)                     #sukuriamas geriausias metodas su ets(M,A,M) train duomenyse
+                                        
+  fc <- forecast(fit,h=1)$mean          #prognozė vienui žingsniui į priekį nuo paskutintos train reikšmės
+                                                   
+  e[i] <- data[i+1]-fc                  #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
+                                        #atitinkamą vektoriaus vietą
   }
-RMSEf=sqrt(mean(e^2,na.rm=TRUE))                #RMSE prognozės naudojant training set'e.    
+RMSEf=sqrt(mean(e^2,na.rm=TRUE))        #RMSE prognozės naudojant training set'e.    
 
 
 ```
 
 ####(g) How does the RMSE computed in (1f) compare to that computed in (1b)? Does the re-selection of a model at each step make much difference?
 
-Iš tikro, kai b) atveju renkames modelį, jau žinome visus duomenis, todėl galime geresnį modelį išsirinkti pritaikytą duomenims. O 1f atveju mes neturime šio pranašumo (nepritaikome vieno modelio visiem duomenims), todėl galbūt ir didesnis RMSE.
+Nėra matomas didelis skirtumas tarp f ir b dalies:
 
 ```{r}
 RMSEb     #b) dalies RMSE
 RMSEf     #f) dalies RMSE
 ```
+

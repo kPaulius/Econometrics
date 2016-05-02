@@ -58,7 +58,7 @@ fit2$model[2]
 
 ETS modelio AIC yra mažesnis, pagal tai ETS yra geresnis.
 
-Iš ACF matome, kad liekanos nekoreliuotos, vidurkis beveik 0, turi normalųjį skirstinį ir iš grafiko matosi, kad liekanos baltasis triukšmas:
+Iš ACF matome, kad liekanos nekoreliuotos, vidurkis beveik 0, bet neturi normaliojo skirstinio, todėl galime teigti, jog liekanos nėra baltasis triukšmas.
 
 ```{r}
 Acf(fit$res)

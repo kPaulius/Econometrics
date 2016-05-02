@@ -175,86 +175,24 @@ RMSEb</code></pre>
 <ol start="6" style="list-style-type: lower-alpha">
 <li>In practice, we will not know that the best model on the whole data set is ETS(M,A,M) until we observe all the data. So a more realistic analysis would be to allow ets to select a different model each time through the loop. Calculate the RMSE using this approach. (Warning: it will take a while as there are a lot of models to fit.)</li>
 </ol>
-<pre class="r"><code>u=c(&quot;A&quot;,&quot;M&quot;)
-j=c(&quot;N&quot;,&quot;A&quot;)  # su M blogai
-f=c(&quot;N&quot;,&quot;A&quot;)  # su M blogai
-
-fit &lt;- ets(train, &quot;MAM&quot;, damped=FALSE) 
-fit &lt;- ets(train, &quot;MMM&quot;, damped=T) 
-
-modRMSE &lt;- function(q,w,r,ToF){                                       
-  for(i in k:(n-1)){
-    train &lt;- ts(data[1:i],freq=12)                                  #sukuriami train duomenys
-    fit &lt;- ets(train, paste(c(q,w,r),collapse=&quot;&quot;), damped=ToF)      #sukuriamas geriausias metodas su ets(M,A,M)
-                                                                    #train duomenyse
-    fc &lt;- forecast(fit,h=1)$mean                                    #prognozė vienui žingsniui į priekį nuo 
-                                                                    #paskutintos train reikšmės
-    e[i] &lt;- data[i+1]-fc                                            #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
-                                                                    #atitinkamą vektoriaus vietą
+<pre class="r"><code>for(i in k:(n-1)){
+  train &lt;- ts(data[1:i],freq=12)        #sukuriami train duomenys
+  fit &lt;- ets(train)                     #sukuriamas geriausias metodas su ets(M,A,M) train duomenyse
+                                        
+  fc &lt;- forecast(fit,h=1)$mean          #prognozė vienui žingsniui į priekį nuo paskutintos train reikšmės
+                                                   
+  e[i] &lt;- data[i+1]-fc                  #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
+                                        #atitinkamą vektoriaus vietą
   }
-      
-  return(sqrt(mean(e^2,na.rm=TRUE)))                #RMSE prognozės naudojant training set'e.    
-}
-
-
-modeliai=NA
-for(q in u){
-  for(w in j){
-    for(r in f){
-      
-      e=modRMSE(q,w,r,F)
-      pav=paste(c(q,w,r),collapse=&quot;&quot;)
-      modelis=c(pav,e)
-      modeliai = data.frame(modeliai,modelis)
-      
-      if(w!=&quot;N&quot;){
-        e=modRMSE(q,w,r,T)
-        pav=paste(c(q,w,&quot;d&quot;,r),collapse=&quot;&quot;)
-        modelis=c(pav,e)
-        modeliai = data.frame(modeliai,modelis)
-      
-      }
-        
-    }
-  }
-}
-modeliai=data.frame(modeliai[,-1])
-
-for(q in u){
-  for(w in j){
-    for(r in f){
-      
-      e=modRMSE(q,w,r,F)
-      pav=paste(c(q,w,r),collapse=&quot;&quot;)
-      modelis=c(pav,e)
-      modeliai = data.frame(modeliai,modelis)
-        
-    }
-  }
-}
-modeliai=data.frame(modeliai[,-1])
-
-###############################
-
-                                     
-for(i in k:(n-1)){
-  train &lt;- ts(data[1:i],freq=12)                                  #sukuriami train duomenys
-  fit &lt;- ets(train)                                 #sukuriamas geriausias metodas su ets(M,A,M)
-                                                                    #train duomenyse
-  fc &lt;- forecast(fit,h=1)$mean                                    #prognozė vienui žingsniui į priekį nuo 
-                                                                    #paskutintos train reikšmės
-  e[i] &lt;- data[i+1]-fc                                            #apskaičiuojama to žingsnio paklaida ir įdedama reikšmė į 
-                                                                    #atitinkamą vektoriaus vietą
-  }
-RMSEf=sqrt(mean(e^2,na.rm=TRUE))                #RMSE prognozės naudojant training set'e.    </code></pre>
+RMSEf=sqrt(mean(e^2,na.rm=TRUE))        #RMSE prognozės naudojant training set'e.    </code></pre>
 </div>
 <div id="g-how-does-the-rmse-computed-in-1f-compare-to-that-computed-in-1b-does-the-re-selection-of-a-model-at-each-step-make-much-difference" class="section level4">
 <h4>(g) How does the RMSE computed in (1f) compare to that computed in (1b)? Does the re-selection of a model at each step make much difference?</h4>
-<p>Iš tikro, kai b) atveju renkames modelį, jau žinome visus duomenis, todėl galime geresnį modelį išsirinkti pritaikytą duomenims. O 1f atveju mes neturime šio pranašumo (nepritaikome vieno modelio visiem duomenims), todėl galbūt ir didesnis RMSE.</p>
+<p>Nėra matomas didelis skirtumas tarp f ir b dalies:</p>
 <pre class="r"><code>RMSEb     #b) dalies RMSE</code></pre>
 <pre><code>## [1] 18.08962</code></pre>
 <pre class="r"><code>RMSEf     #f) dalies RMSE</code></pre>
-<pre><code>## [1] 18.47666</code></pre>
+<pre><code>## [1] 18.47088</code></pre>
 </div>
 
 

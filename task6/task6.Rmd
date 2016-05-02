@@ -30,6 +30,7 @@ plot(data)                                                # a) dalis, išbrėži
 x=rwf(data, drift=TRUE, h=30)                             # b) dalis, draft prognozė 
 plot(x)
 ```
+
 Atsižvelgia į trendą. trendas su random walk.
 
 ####(c) Show that the graphed forecasts are identical to extending the line drawn between the first and last observations
@@ -57,5 +58,5 @@ plot(y)
 tsdisplay(data, plot.type="scatter")
 ```
 
-Vidurkio prognozė yra prastesnė, nes akivaizdus trūkio taškas. Tiktų naive arba drift metodas. Kadangi paskutiniai duomenys pradėjo ir leistis, galime tik spėti ar kiti duomenys kris ar kils. Todėl rinkčiausi naive modelį, nes prognozė nei kyla nei leidžiasi, tinka šiame neužtikrintume dėl ateities.
+Vidurkio prognozė yra prastesnė, nes akivaizdus trūkio taškas. Tiktų naive arba drift metodas. Kadangi paskutiniai duomenys pradėjo ir leistis, galime tik spėti ar kiti duomenys kris ar kils. Matomas random walk, todėl rinkčiausi naive modelį, nes prognozė nei kyla nei leidžiasi, tinka šiame neužtikrintume dėl ateities.
 

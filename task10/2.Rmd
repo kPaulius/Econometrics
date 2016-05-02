@@ -76,24 +76,26 @@ Geriausiai pasirodė fit3 - slopinamasis Holt-Winter multiplikatyvusis metodas, 
 
 #### f) Ar liekanos baltasis triukšmas?
 
-Liekanų vidurkis yra lygus beveik 0, nėra koreliacijos tarp liekanų. O normaliojo skirstinio teste gali būti atmesta nulinė hipotezė, kad liekanos neturi normaliojo skirstinio, jei reikšmingumo lygmuo 0,05. Tačiau, jei reikšmingumo lygmuo 0,01, tada negalime tarti, kad liekanos turi normalųjį skirstinį. 
+Liekanų vidurkis yra lygus beveik 0, nėra koreliacijos tarp liekanų. O normaliojo skirstinio teste gali būti atmesta nulinė hipotezė, kad liekanos iš normaliojo skirstinio, jei reikšmingumo lygmuo 0,05. Tačiau, jei reikšmingumo lygmuo 0,01, tada negalime tarti, kad liekanos neturi normaliojo skirstinio. 
 
 ```{r}
+mean(fit3$res)
 Acf(fit3$res, main="ACF of residuals")
+Box.test(fit3$res)
 shapiro.test(fit3$res)
 ```
 
-Iš histogramos liekanos neatrodo normaliai pasiskirčiusios:
+Histograma liekanų:
 ```{r}
 plot(fit3$res)
 hist(fit3$res, nclass="FD", main="Histogram of residuals")
 ```
 
-Tačiau palyginę grafikus(baltojo triukšmo grafikas ir liekanų grafikas):
+Palyginkime grafikus(baltojo triukšmo grafikas ir liekanų grafikas):
 ```{r}
 par(mfrow=c(1,2))
 plot(x=1:length(fit3$res),y=rnorm(length(fit3$res),0,1),type="l", main="baltasis triukšmas",ylab="reikšmė", xlab="laikas")
 plot(fit3$res, main="liekanų grafikas",ylab="liekanos", xlab="laikas")
 ```
 
-Galime sakyti liekanos yra baltasis triukšmas.
+Galime sakyti liekanos yra baltasis triukšmas, nes liekanos galime tart turi normalųjį skirstinį, nėra koreliuotos ir vidurkis beveik lygus 0.
