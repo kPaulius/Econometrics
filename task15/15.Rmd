@@ -1,0 +1,47 @@
+---
+title: "task 14"
+author: "Paulius Kostickis"
+date: "Tuesday, May 03, 2016"
+output: html_document
+---
+####1. Choose one of the following seasonal time series: condmilk, hsales, uselec
+
+Pasirinksime condmilk duomenis - kondensuoto pieno gamintojo akcijas.
+
+```{r,include=F}
+library(fpp)
+library(knitr)
+
+```
+
+
+####(a) Do the data need transforming? If so, find a suitable transformation.
+
+Matome, jog duomenims neb8tina transformacioja, nes vienoda variacija. 
+
+```{r}
+data=condmilk
+tsdisplay(data, plot.type="scatter")
+
+```
+
+
+####(b) Are the data stationary? If not, find an appropriate differencing, which yields stationary data.
+
+Kadangi duomenys turi sezoniškumą, reikia diferencijuoti, kad gauti stacionarius duomenis
+
+```{r}
+
+grafikas(data,T)
+```
+
+(c) Identify a couple of ARIMA models that might be useful in describing
+the time series. Which of your models is the best according
+to their AIC values?
+(d) Estimate the parameters of your best model and do diagnostic
+testing on the residuals. Do the residuals resemble white noise?
+If not, try to find another ARIMA model which fits better.
+(e) Forecast the next 24 months of data using your preferred model.
+(f) Compare the forecasts obtained using ets().
+
+{}
