@@ -17,12 +17,16 @@ library(knitr)
 
 ####(a) Do the data need transforming? If so, find a suitable transformation.
 
-Matome, jog duomenims neb8tina transformacioja, nes vienoda variacija. 
+Matome, jog duomenims nebūtina transformacija, nes vienoda variacija. 
 
 ```{r}
+lambda = BoxCox.lambda(data)                        #randamas lambda  
+  trdata = BoxCox(data,lambda = lambda)               #transformuojami duomenys
 data=condmilk
 tsdisplay(data, plot.type="scatter")
-
+tsdisplay(trdata, plot.type="scatter")
+kpss.test(trdata)
+acf(data)
 ```
 
 
@@ -31,7 +35,10 @@ tsdisplay(data, plot.type="scatter")
 Kadangi duomenys turi sezoniškumą, reikia diferencijuoti, kad gauti stacionarius duomenis
 
 ```{r}
-
+nd=nsdiffs(trdata)
+nd
+nd <- ndiffs(trdiff)     
+diffdata <- diff(data,differences=nd)
 grafikas(data,T)
 ```
 

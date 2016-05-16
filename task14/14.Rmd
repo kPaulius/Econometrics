@@ -23,25 +23,26 @@ tsdisplay(data, plot.type="scatter")
 
 (b) fit a suitable ARIMA model to the transformed data using auto.arima();
 
-Auto.arima taikoma duomenim:
+####Auto.arima taikoma duomenim:
 ```{r}
-auto.arima(data)
+mod1=auto.arima(data)
+mod1
 ```
 
-Gaunama ARIMA(1,2,1)
+Gauname ARIMA(1,2,1)
 
 (c) try some other plausible models by experimenting with the orders chosen;
 
-Reikia iš pradžių duomenis padaryti stacionarius:
+####Sužinosime kiek reikia diferencijuoti, kad būtų stacionarūs duomenys (iš auto.arima matome, kad d=2, tiek pat kartų diferencijuoti nurodo ir "ndiffs" funkcija)
 ```{r}
 
 nd=ndiffs(data)
+nd
 diffdata <- diff(data,differences=nd)
-plot(diffdata)
-kpss.test(diffdata)  # p-vaule > 0.05 H0 neatmetame, kad duomenys stacionarūs.
+
 ```
 
-Kaip matome iš ACF ir PACF grafikų nieko negalime sužinoti kokį ARIMA modelį naudoti, nes nei vienas nėra gęstančio grafiko ar kelių reikšmingų lag'ų:
+Diferencijuotų duomenų ACF atrodo lyg sinusoidinis. O PACF grafike matomas 5-tas reikšmingas lag'as, o tolesni lag'ai nereikšmingi.
 
 ```{r}
 par(mfrow=c(1,2))
@@ -49,26 +50,77 @@ pacf(diffdata)
 acf(diffdata)
 ```
 
-Tai tuomet bandysime automatiškai parinktą modelį truputi keisti:
+####Reiškia galime spėti, jog p=5, o q=0.
+
+Tai ir naudosime ARIMA modelyje:
 ```{r}
-AICc(arima(data,c(1,2,3)))
+mod2=arima(data,c(5,2,0))
+
+```
+
+####Pakeisime kai kuriuos rodiklius:
+```{r}
+mod3=arima(data,c(5,2,1))
+mod4=arima(data,c(4,2,0))
 
 ```
 
 (d) choose what you think is the best model and check the residual
 diagnostics;
+
+####Pagal accuracy ir AIC spėčiau, kad mod3 yra geriausias, t.y. ARIMA(5,2,1)
+
+```{r}
+kable(accuracy(mod1))
+kable(accuracy(mod2))
+kable(accuracy(mod3))
+kable(accuracy(mod4))
+mod1$aic
+mod2$aic
+mod3$aic
+mod4$aic
+```
+
+####Ar liekanos baltasis triukšmas?
+```{r}
+Box.test(mod3$res, type="Lj")   # p > 0.05, H0 neatmetamas, kad liekanos nekoreliuotos
+mean(mod3$res)                  # vidurkis labai arti 0
+shapiro.test(mod3$res)          # galime neatmesti H0, nes p > 0.05, liekanos normaliojo skirstinio
+
+```
+
+Atlikę testus, galime teigti, jog liekanos baltasis triukšmas
+
 (e) produce forecasts of your fitted model. Do the forecasts look
 reasonable?
+Prognozė:
+```{r}
+plot(forecast(mod3))
+```
+
+Prognozės mažėjimas atrodo logiškas, tačiau galime manyti, kad mažėjimas bus eksponentinis, ne toks status. Priežastys dėl gerėjančios gyvenimo kokybės, nusikalstamumo mažėjimo, didesnio moterų teisių gynimo. Duomenys turėtų artėti link kažkokio skaičiaus, tačiau nekonverguoti į visišką nulį ir neturėtų virsti neigiama reikšme.
 
 (f) compare the results with what you would obtain using ets()
 (with no transformation).
 
+ETS modelis pagal ETS, liekanos pagal testus yra baltasis triukšmas 
+```{r}
+modETS=ets(wmurders)
+modETS
+Box.test(modETS$res, type="Lj")   # p > 0.05, H0 neatmetamas, kad liekanos nekoreliuotos
+mean(modETS$res)                  # vidurkis labai arti 0
+shapiro.test(modETS$res)          # galime neatmesti H0, nes p > 0.05, liekanos normaliojo skirstinio
+```
 
 
+####ETS(M,N,N) vs ARIMA(5,2,1)
 
+```{r}
+kable(accuracy(modETS))
+kable(accuracy(mod3))
+```
 
-
-
+Matome, jog ARIMA(5,2,1) geresnis pagal accuracy rodiklius.
 
 
 
@@ -78,26 +130,258 @@ reasonable?
 
 
 2. For the usgdp data:
+
+usgdp - tai JAV ketvirčio BVP nuo 1947 iki 2006 metų.
+
 (a) if necessary, find a suitable Box-Cox transformation for the data;
+```{r}
+data=usgdp
+tsdisplay(data, plot.type="scatter") 
+```
+
+Kaip matome, duomenys neturi ryškesnių svyravimų, todėl nenaudosime Box-Cox transformacijos.
+
 (b) fit a suitable ARIMA model to the transformed data using
 auto.arima();
+####Randame ARIMA modelį su auto.arima funkcija:
+```{r}
+mod1=auto.arima(data)
+mod1
+```
+Gauname ARIMA(2,2,2)
+
 (c) try some other plausible models by experimenting with the
 orders chosen;
+
+####Sužinosime kiek reikia diferencijuoti, kad būtų stacionarūs duomenys (iš auto.arima matome, kad d=2, tiek pat kartų diferencijuoti nurodo ir "ndiffs" funkcija)
+```{r}
+
+nd=ndiffs(data)
+nd
+diffdata <- diff(data,differences=nd)
+
+```
+
+Diferencijuotų duomenų ACF atrodo lyg sinusoidinis. O PACF grafike matomas 14-tas reikšmingas lag'as, o tolesni lag'ai nereikšmingi.
+
+```{r}
+par(mfrow=c(1,2))
+pacf(diffdata)
+acf(diffdata)
+```
+
+####Reiškia galime spėti, jog p=14, o q=0.
+
+Tai ir naudosime ARIMA modelyje:
+```{r}
+mod2=arima(data,c(14,2,0))
+
+```
+
+####Pakeisime kai kuriuos rodiklius:
+```{r}
+mod3=arima(data,c(13,2,0))
+mod4=arima(data,c(15,2,0))
+mod5=arima(data,c(14,2,1))
+mod6=arima(data,c(15,2,1))
+mod7=arima(data,c(15,2,2))
+```
+
+
 (d) choose what you think is the best model and check the residual
 diagnostics;
+####Pagal AIC ir accuracy, manyčiau, kad mod5 t.y. ARIMA(15,2,1) yra geriausias:
+```{r}
+kable(accuracy(mod1))
+kable(accuracy(mod2))
+kable(accuracy(mod3))
+kable(accuracy(mod4))
+kable(accuracy(mod5))
+kable(accuracy(mod6))
+kable(accuracy(mod7))
+mod1$aic
+mod2$aic
+mod3$aic
+mod4$aic
+mod5$aic
+mod6$aic
+mod7$aic
+```
+
+####Ar geriausio modelio liekanos yra baltasis triukšmas:
+
+```{r}
+Box.test(mod6$res, type="Lj")   # p > 0.05, H0 neatmetamas, kad liekanos nekoreliuotos
+mean(mod6$res)                  # vidurkis nėra arti 0
+shapiro.test(mod6$res)          # galime neatmesti H0, nes p > 0.05, liekanos normaliojo skirstinio
+```
+
+Paklaidų vidurkis skaitiškai nėra arti 0, todėl papildomai atliksiu T testą vidurkiui = 0, nes baltas triukšmas turi turėti vidurkį lygiam 0.
+```{r}
+t.test(mod6$res,mu=0)           # p > 0.05, H0 neatmetamas, liekanų vidurkis statistiškai nereikšmingai skiriasi nuo 0.
+
+```
+
 (e) produce forecasts of your fitted model. Do the forecasts look
 reasonable?
+
+####ARIMA(15,2,1) prognozė:
+
+```{r}
+plot(forecast(mod6))
+```
+
+Ji atrodo logiška, iš tokių duomenų panašios prognozės ir reikėtų tikėtis.
+
 (f) compare the results with what you would obtain using ets()
 (with no transformation).
+
+####ETS modelis pagal ETS, liekanos atrodo pagal testus yra baltasis triukšmas 
+```{r}
+modETS=ets(usgdp)
+modETS
+Box.test(modETS$res, type="Lj")   # p > 0.05, H0 neatmetamas, kad liekanos nekoreliuotos
+mean(modETS$res)                  # vidurkis manoma statistiškai nereikšmingai skiriasi nuo 0
+shapiro.test(modETS$res)          # galime neatmesti H0, nes p > 0.05, liekanos normaliojo skirstinio
+```
+
+
+####ETS(A,A,N) vs ARIMA(15,2,1)
+
+```{r}
+kable(accuracy(modETS))
+kable(accuracy(mod6))
+modETS$aic
+mod6$aic
+```
+
+Matome, jog ARIMA(15,2,1) geresnis pagal accuracy ir AIC rodiklius.
+
+
+
 3. For the mcopper data:
+
+mcopper - mėnesinės vario kainos.
+
+
 (a) if necessary, find a suitable Box-Cox transformation for the data;
+
+Iš duomenų grafiko matome, kad galbūt reikėtų ransformuoti duomenis, nes pastebimi svyravimai.
+```{r}
+data=mcopper
+tsdisplay(data, plot.type="scatter") 
+```
+
+```{r}
+lambda<-BoxCox.lambda(data)               #lambda skaičius randamas
+transfdata<-BoxCox(mcopper, lambda=lambda)  #transformuojami duomenys
+tsdisplay(transfdata, plot.type="scatter")  #transformuojamų duomenų grafikas
+```
+
+Tačiau transformacija akivaizdžiai nesumažino svyravimo. Reiškia nebūtina transformuoti.
+
+
 (b) fit a suitable ARIMA model to the transformed data using
 auto.arima();
+Randame ARIMA modelį su auto.arima funkcija diferencijuotiems duomenim:
+```{r}
+mod1=auto.arima(data)
+mod1
+```
+
+Gauname ARIMA(0,1,1)
+
+
 (c) try some other plausible models by experimenting with the
 orders chosen;
+
+####Sužinosime kiek reikia diferencijuoti, kad būtų stacionarūs duomenys (iš auto.arima matome, kad d=1, tiek pat kartų diferencijuoti nurodo ir "ndiffs" funkcija)
+```{r}
+
+nd=ndiffs(data)
+nd
+diffdata <- diff(transfdata,differences=nd)
+
+```
+
+####Iš diferencijuotų duomenų ACF ir PACF grafikų neįžvelgiu indikacijų dėl parametrų.
+
+```{r}
+par(mfrow=c(1,2))
+pacf(diffdata)
+acf(diffdata)
+```
+
+
+####Tai bandysiu modifikuoti ARIMA(0,1,1) modelį:
+
+```{r}
+mod2=arima(data,c(0,1,2))
+mod3=arima(data,c(0,1,3))
+mod4=arima(data,c(1,1,3))
+mod5=arima(data,c(2,1,3))
+```
+
+
 (d) choose what you think is the best model and check the residual
 diagnostics;
+
+####Pagal AIC ir accuracy, manyčiau, kad mod1 t.y. ARIMA(0,1,1) yra geriausias:
+```{r}
+kable(accuracy(mod1))
+kable(accuracy(mod2))
+kable(accuracy(mod3))
+kable(accuracy(mod4))
+kable(accuracy(mod5))
+
+mod1$aic
+mod2$aic
+mod3$aic
+mod4$aic
+mod5$aic
+
+```
+
+####Ar geriausio modelio liekanos yra baltasis triukšmas:
+
+```{r}
+Box.test(mod1$res, type="Lj") 
+
+shapiro.test(mod1$res)          # galime atmesti H0, nes p < 0.05, liekanos  nėra normaliojo skirstinio
+
+```
+
+Paklaidos nėra baltasis triukšmas, nes neturi normaliojo skirstinio. Tačiau modifikuotų modelio toks pat rezultatas, tai nekeisiu savo pasirinkto modelio, tačiau reiškia, kad prognozė gali būti geresnė.
+
+
 (e) produce forecasts of your fitted model. Do the forecasts look
 reasonable?
+####Geriausio modelio ARIMA(0,1,1) prognozė
+```{r}
+plot(forecast(mod1),plot.conf=F)
+```
+
+Iš tikro, turint tokius duomenis, mes nelabai galime prognozuoti vario kainos. Mažai tikėtina, kad ši prognozė yra gera, tačiau turint tik tokius duomenis galime manyti, jog geresnio modelio negaliu sukurti. Galima būtų manyti, kad vario kainos **pokytis** mažai priklauso nuo savo praeities kainos, o daugiau priklauso nuo kitų rinkos kintamųjų.
+
 (f) compare the results with what you would obtain using ets()
 (with no transformation).
+
+####ETS modelis:
+```{r}
+modETS=ets(data)
+modETS
+Box.test(modETS$res, type="Lj")   # p < 0.05, H0 atmetamas, liekanos koreliuotos
+```
+Gauname ETS(M,Ad,N) 
+
+####ETS(M,Ad,N) vs ARIMA(0,1,1)
+
+```{r}
+kable(accuracy(modETS))
+kable(accuracy(mod1))
+modETS$aic
+mod1$aic
+
+```
+
+Pagal AIC ir accuracy rodiklius ARIMA(0,1,1) geresnis.

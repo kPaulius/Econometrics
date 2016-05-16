@@ -5,15 +5,15 @@ montecarlo = function(n){
   for(i in 1:n){    
     suskambejo = 0
     while(suskambejo==0){                                            #laukiame kol suskambės detektorius, parenkami žmonės tol kol suskambės
-      praeivis=sample(c(1,0), 1, prob=c(50/700000,699950/700000))    #parenkamas praeinantysis žmogus
-      if(praeivis==1) {                                              #jei žmogus teroristas
+      praeivis=sample(c(1,0), 1, prob=c(50/700000,699950/700000))    #parenkamas praeinantysis žmogus (arba teroristas=1 arba ne teroristas = 0)
+      if(praeivis==1) {                                              #jei žmogus teroristas tikimybė, kad suskambės
         suskambejo=(sample(c(1,0), 1, prob=c(1-0.0095,0.0095)))
       }
-      if(praeivis==0){                                               #jei žmogus nėra teroristas
+      if(praeivis==0){                                               #jei žmogus nėra teroristas tikimybė, kad suskambės
         suskambejo=(sample(c(1,0), 1, prob=c(0.005,1-0.005)))
       }
     }
-    data[i]=praeivis                                                 #kai suskamba, pažymime koks tai žmogus
+    data[i]=praeivis                                                 #kai suskamba, pažymime koks tai žmogus, jei teroristas, tuomet praeivis = 1
   }
   return(data)
 
