@@ -17,34 +17,42 @@ library(knitr)
 
 ####(a) Do the data need transforming? If so, find a suitable transformation.
 
-Matome, jog duomenims nebūtina transformacija, nes vienoda variacija. 
+Matome, jog duomenims nebūtina transformacija, variacija atrodo vienoda visu laiku. 
 
 ```{r}
-lambda = BoxCox.lambda(data)                        #randamas lambda  
-  trdata = BoxCox(data,lambda = lambda)               #transformuojami duomenys
 data=condmilk
 tsdisplay(data, plot.type="scatter")
-tsdisplay(trdata, plot.type="scatter")
-kpss.test(trdata)
-acf(data)
+
 ```
 
 
 ####(b) Are the data stationary? If not, find an appropriate differencing, which yields stationary data.
 
-Kadangi duomenys turi sezoniškumą, reikia diferencijuoti, kad gauti stacionarius duomenis
+Kadangi duomenys turi sezoniškumą, reikia diferencijuoti, kad gauti stacionarius duomenis:
 
 ```{r}
-nd=nsdiffs(trdata)
-nd
-nd <- ndiffs(trdiff)     
-diffdata <- diff(data,differences=nd)
-grafikas(data,T)
+diffdata<-diff(condmilk, lag=12)
+tsdisplay(diffdata, plot.type="scatter")
 ```
+
+Matomas trendas, tai diferencijuojame dar kartą:
+```{r}
+diffdata<-diff(diffdata, lag=1)
+tsdisplay(diffdata, plot.type="scatter")
+```
+
+Dabar duomenys yra stacionarūs.
+
 
 (c) Identify a couple of ARIMA models that might be useful in describing
 the time series. Which of your models is the best according
 to their AIC values?
+
+```{r}
+
+```
+
+
 (d) Estimate the parameters of your best model and do diagnostic
 testing on the residuals. Do the residuals resemble white noise?
 If not, try to find another ARIMA model which fits better.
