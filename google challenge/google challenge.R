@@ -1,5 +1,4 @@
-https://support.rstudio.com/hc/en-us/articles/205612627-Debugging-with-RStudio
-data=scan("A-large-practice.in")    # kodo paradoxas su A ir B samples
+data=scan("A-large-practice.in")  
 sink('analysis-output.txt')          
 
 n=1
