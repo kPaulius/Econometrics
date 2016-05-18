@@ -1,5 +1,5 @@
 ---
-title: "task 14"
+title: "task 15"
 author: "Paulius Kostickis"
 date: "Tuesday, May 03, 2016"
 output: html_document
@@ -35,7 +35,7 @@ diffdata<-diff(condmilk, lag=12)
 tsdisplay(diffdata, plot.type="scatter")
 ```
 
-Matomas trendas, tai diferencijuojame dar kartą:
+Vis dar nėra stacionarūs duomenys, tai diferencijuojame dar kartą:
 ```{r}
 diffdata<-diff(diffdata, lag=1)
 tsdisplay(diffdata, plot.type="scatter")
@@ -48,15 +48,74 @@ Dabar duomenys yra stacionarūs.
 the time series. Which of your models is the best according
 to their AIC values?
 
+Pirma pažiūrėsime į ACF ir PACF grafikus:
+
 ```{r}
+par(mfrow=c(1,2))
+acf(diffdata)
+pacf(diffdata)
+```
+
+Iš grafikų galime bandyti sudaryti **ARIMA(0,1,1)(2,1,0)[12]** ir truputį jį modifikuoti pabandymui:
+```{r}
+mod0=arima(data, order = c(0,1,1),seasonal = list(order=c(2,1,0),period=12))
+mod1=auto.arima(data)
+mod2=arima(data, order = c(1,1,1),seasonal = list(order=c(2,1,2),period=12))
+```
+
+Kaip matome paskutinio modelio AIC geriausias:
+
+```{r}
+modeliai <-c(1,2,3)
+aic <- c(AIC(mod0), AIC(mod1), AIC(mod2))
+data.frame(modeliai, aic)
 
 ```
 
+Tai geriausias modelis pagal AIC yra **ARIMA(1,1,1)(2,1,2)[12]**
 
 (d) Estimate the parameters of your best model and do diagnostic
 testing on the residuals. Do the residuals resemble white noise?
 If not, try to find another ARIMA model which fits better.
+
+```{r}
+acf(mod2$res)
+Box.test(mod2$res, type="Lj") #p-value>0.05, vadinasi liekanos yra baltasis triukšmas
+```
+
+**ARIMA(1,1,1)(2,1,2)[12]** modelio paklaido yra baltasis triukšmas, reiškia galime pasirinkti šį modelį.
+
 (e) Forecast the next 24 months of data using your preferred model.
+
+**ARIMA(1,1,1)(2,1,2)[12]** prognozė:
+
+```{r}
+prognoze<- forecast(mod2, h=24)
+plot(prognoze)
+
+```
+
+Atrodo logiška.
+
+
 (f) Compare the forecasts obtained using ets().
 
-{}
+Gauname ETS(M,N,M):
+```{r}
+modETS <- ets(data)
+prognoze_ETS <- forecast(modETS, h=24)
+par(mfrow=c(1,2))
+plot(prognoze_ETS)
+plot(prognoze)
+```
+
+Iš akies žiūrint atrodo, jog ARIMA geriau prognozuotų žiūrint į praities duomenis.
+
+Palyginsime juos pagal AIC:
+```{r}
+modeliai <- c("ARIMA","ETS")
+AIC <- c(AIC(mod2), AIC(modETS))
+data.frame(modeliai, AIC)
+```
+
+Matome ARIMA turi mažesnį AIC.
