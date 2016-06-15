@@ -8,9 +8,9 @@ output: html_document
 Bibliotekos:
 
 ```{r}
-#install.packages("car")
-#install.packages("fpp")
-#install.packages("dynlm")
+install.packages("car")
+install.packages("fpp")
+install.packages("dynlm")
 #install.packages("knitr")
 #install.packages("lmtest")
 library(car)
@@ -179,7 +179,8 @@ accuracy(f_mod33, serpradinis)
 accuracy(f_mod44, ser)
 #neveikia mod44 nezinau kodel
 
-#pasirenku mod11 kaip geriausia
+#mod33 pasirenku kaip geriausia, mors manau mod44 butu geresnis, jei veiktu accuracy
+modMain=mod3
 
 tikslumas <- function(i){
 
@@ -194,11 +195,11 @@ tikslumas <- function(i){
     subset = window(ser, end = c(1961+a,4))
     testset = window(ser,start=c(1962+a,1))
   }
-  mod11<-ets(subset)     #geriausiu modeliu
+  mod11<-auto.arima(subset)     #geriausiu modeliu
   f_mod11<-forecast(mod1_1, h=20)
   RMSE = 
   return(RMSE)
 }
-
+#nespejau pabaigti 4
 
 ```
