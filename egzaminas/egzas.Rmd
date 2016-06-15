@@ -1,0 +1,194 @@
+---
+title: "template2"
+author: "Paulius Kostickis"
+date: "Tuesday, June 14, 2016"
+output: html_document
+---
+
+Bibliotekos:
+
+```{r}
+#install.packages("car")
+#install.packages("fpp")
+#install.packages("dynlm")
+#install.packages("knitr")
+#install.packages("lmtest")
+library(car)
+library(fpp)
+library(dynlm)
+library(knitr)
+library(lmtest)
+```
+
+
+
+#1 užduotis:
+```{r}
+#atlikau tik monte carlo budu
+#b)
+X1=rnorm(10000,3,2)
+X2=rnorm(10000,-1,3)
+X=X1+X2
+hist(X,probability = T)      #skirstinys
+lines(density(X),col=4,lwd=2)
+summary(X)    #charakteristikos
+sd(X)
+
+#d)
+Xkvad=X*X
+mean(Xkvad-X-2>0)      #tikimybė
+
+#e)
+Xteig= X[X>0]     
+Xteigkvad=Xteig*Xteig
+mean(Xteigkvad-Xteig-2>0)  #tikimybė
+
+
+```
+
+
+#3 užduotis:
+
+```{r}
+
+data=M1Germany
+
+#a)
+mod1=dynlm(logm1~L(logprice,1),data=data)      
+serOrg=ts(mod1$res, frequency = 4)
+x=stl(serOrg,"periodic")
+s=x$time.series[,"seasonal"]  #sezonine komponente
+s=ts(s,start=1960,frequency=4)
+
+mod=dynlm(data$logprice~L(data$loggnp,1)+d(L(data$loggnp,2)) + s)      
+
+#b)
+ser = ts(mod$res, end=1995+2/4, frequency=4)
+serpradinis=ser
+#c)
+tsdisplay(ser)
+
+#matome yra sezoniskumas kas 4 lagus, todel nera stacionari, diferencijuojame
+
+serdiff=diff(ser,lag=4,differences=1)
+tsdisplay(serdiff)
+kpss.test(serdiff)$p.value
+ser=serdiff
+#yra stacionari, testas tai dar patvirtina
+ tsdisplay(ser)
+
+
+lambda = BoxCox.lambda(ser)                        #randamas lambda  
+ser2 = BoxCox(ser,lambda = lambda)               #transformuojami duomenys
+par(mfrow=c(1,2))
+plot(ser)
+plot(ser2)
+#matome, kad transformacija paslenka duomenis ir nesumazina variacijos,
+#todel nereikia transformuoti
+
+
+mod1 <- ets(ser)
+#Gavome ETS(A,N,N)
+
+#A - errors additive (atsizvelgia i preitas paklaidas sumuojant), N - nera trendo, N- nera sezoniskumo
+
+mod12<-hw(ser) #HoltWinters funkcija
+
+plot(mod12)
+plot(forecast(mod1,h=10))
+
+#mod1 geresnis, nes cia nelabai tinka HoltWinters, nes neturetu cia buti sezoniskumo
+
+mod2=mod1
+#taigi ETS pasirinkau kaip mod2
+
+#c)
+mod3 <- auto.arima(serpradinis)
+#gauname ARIMA(3,1,2)(2,0,0)[4] 
+
+#(p,d,q)(P,D,Q)[]
+#p - autoregresine modelio parametras, d - diferensijavimo eile,
+# q - moving average parametras, didziosios raides sezoniniu parametru atitikmenys
+
+#diferencijavimas sutampa su mano eile
+
+#d)
+tsdisplay(ser)
+#pagal PACF 2 pradinius reiksmingus paimu p = 2, del acf 3 reiksmingu paimu q = 3
+mod41=arima(ser,order=c(2,0,3))
+#truputi pakeiciu parametrus:
+mod42=arima(ser,order=c(2,0,4))
+mod43=arima(ser,order=c(3,0,3))
+
+#mod 41 yra geriausias pagal AIC
+
+mod4=mod41
+
+#3
+#a)
+arbaltasis <- function(res){
+  par(mfrow=c(1,2))
+p=Box.test(res, type="Lj")$p.value  #del baltojo triuksmo, H0 kad baltasis triuksmas
+acf(res)
+plot(res)
+return(p)
+}
+arbaltasis(mod1$res)
+arbaltasis(mod2$res)
+arbaltasis(mod3$res)
+arbaltasis(mod4$res)
+
+#matome kad visu modeliu paklaidos yra baltasis triuksmas
+
+#b)
+trainSet<-window(ser, end = c(1985,4))
+testSet<-window(ser, start = c(1986, 1))
+trainset_pradinis_ser<-window(serpradinis,end = c(1985,4) )
+testset_pradinis_ser<-window(serpradinis,start = c(1986, 1) ) #auto.arimai pati pavercia stacionare eilute tai imu nestacionare serpradinis
+#c)
+
+mod11<-ets(trainSet)
+mod33<-auto.arima(trainset_pradinis_ser)
+mod44<-arima(ser,order=c(2,0,3))
+
+#mod2 ir mod1 sutampa tai mod2 nekartosiu
+
+#d)
+f_mod11<-forecast(mod11, h=20)
+f_mod33<-forecast(mod33, h=20)
+f_mod44<-forecast(mod44, h=20)
+plot(f_mod11)
+lines(testSet,col="red")
+
+plot(f_mod33)
+lines(testset_pradinis_ser,col="red")
+
+plot(f_mod44)
+
+#melynas prognoze ir intervalas, raudonas reiksmes is testSet
+
+
+
+
+
+tikslumas <- function(i){
+
+  a=as.integer(i/4)
+  b=(i/4-a)*4
+  
+  if(b>0){
+    subset = window(ser, end = c(1961+1+a,4))
+    testset = window(ser, start = c(1961+2+a,b+1))
+  }
+  if(b==0){
+    subset = window(ser, end = c(1961+a,4))
+    testset = window(ser,start=c(1962+a,1))
+  }
+  mod11<-ets(subset)     #geriausiu modeliu
+  f_mod11<-forecast(mod1_1, h=20)
+  RMSE = 
+  return(RMSE)
+}
+
+
+```
