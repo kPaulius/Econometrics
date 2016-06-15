@@ -169,7 +169,17 @@ plot(f_mod44)
 
 
 
+#e)
+#mod11
+accuracy(f_mod11, ser)
+#mod33
+accuracy(f_mod33, serpradinis)
+#manau padariau klaida imdamas nestacionarius duomenis, nes lyginant sunkiau, reikejo stacionarius jau duomenis idet
+#mod44
+accuracy(f_mod44, ser)
+#neveikia mod44 nezinau kodel
 
+#pasirenku mod11 kaip geriausia
 
 tikslumas <- function(i){
 
